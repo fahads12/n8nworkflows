@@ -1,4 +1,4 @@
-🚀 n8n Workflow Vault – Real-World Automation Templates
+🚀 N8N Workflow Vault – Real-World Automation Templates
 
 This repository showcases a professionally curated collection of n8n automation workflows, purpose-built to solve real-world business and operational challenges across diverse industries.
 
