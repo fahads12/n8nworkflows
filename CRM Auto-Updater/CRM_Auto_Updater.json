@@ -1,0 +1,134 @@
+{
+  "name": "CRM_Auto_Updater",
+  "nodes": [
+    {
+      "parameters": {
+        "formId": "Q3KUzanr"
+      },
+      "id": "567e2947-b53f-4f61-8a2a-8912ccc34ec9",
+      "name": "Typeform Trigger",
+      "type": "n8n-nodes-base.typeformTrigger",
+      "typeVersion": 1,
+      "position": [
+        300,
+        -180
+      ],
+      "webhookId": "typeform-webhook-id"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "24a906ab-92d5-4c8c-b920-fef9cb470027",
+              "name": "Full Name",
+              "value": "={{ $json['Full Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "88ce948a-0852-4dca-8c84-063f3bf832f1",
+              "name": "Email",
+              "value": "={{ $json['Enter Your Email'] }}",
+              "type": "string"
+            },
+            {
+              "id": "f45d88d5-a7a2-4758-a871-ca0282f39e99",
+              "name": "Phone",
+              "value": "={{ $json['Enter Your Phone'] }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        520,
+        -180
+      ],
+      "id": "89cbd270-b853-4e49-88a4-8cab332d3fd1",
+      "name": "Format Data"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "additionalFields": {
+          "phoneNumber": "={{ $json.Phone }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.1,
+      "position": [
+        740,
+        -180
+      ],
+      "id": "e12d0480-6f81-4582-9bc3-31e14ccf9572",
+      "name": "Create or update a contact"
+    },
+    {
+      "parameters": {
+        "fromEmail": "Enter Your Email",
+        "toEmail": "={{ $json['identity-profiles'][0].identities[0].value }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        920,
+        -180
+      ],
+      "id": "3d9b697e-f2ad-4946-bb19-94859707d9db",
+      "name": "Send email",
+      "webhookId": "a82c62a5-cd72-47fe-850f-2b801f13ec13"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Typeform Trigger": {
+      "main": [
+        [
+          {
+            "node": "Format Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Data": {
+      "main": [
+        [
+          {
+            "node": "Create or update a contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a contact": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "94b55977-f10f-4d51-921e-5bcc2e5d3904",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}

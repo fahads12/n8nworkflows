@@ -1,0 +1,103 @@
+{
+  "name": "Job_Application_Tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "formId": "Q3KUzanr"
+      },
+      "id": "173037c9-298c-4ba9-aa36-3a9b2483114b",
+      "name": "job application form",
+      "type": "n8n-nodes-base.typeformTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        -220
+      ],
+      "webhookId": "typeform-webhook-id"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C090LF8DVFZ",
+          "mode": "list",
+          "cachedResultName": "n8n-testing"
+        },
+        "text": "=📝 New Job Application Received  👤 Name: {{$json.form_response.answers[0].text}}   📧 Email: {{$json.form_response.answers[1].email}}   🎯 Role: {{$json.form_response.answers[2].text}}   📎 CV: {{$json.form_response.answers[3].url}}  Check and update status in Notion.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        660,
+        -220
+      ],
+      "id": "9ccb02f1-909b-4bbb-81d4-6782891e18e7",
+      "name": "Notify recruiter",
+      "webhookId": "9a8d568b-ce15-4210-a617-6097789e1c0e"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        -220
+      ],
+      "id": "f3d257d0-8dc4-4e98-bd15-da84afd6ed92",
+      "name": "Job_Application_Tracker"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "job application form": {
+      "main": [
+        [
+          {
+            "node": "Job_Application_Tracker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job_Application_Tracker": {
+      "main": [
+        [
+          {
+            "node": "Notify recruiter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ed541ce6-5c0e-498d-b1be-1a37ea85ee1c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": [
+    {
+      "name": "TypeForm, Notion, Slack",
+      "id": "ruNP1p1AOxgyYATd",
+      "createdAt": "2025-07-06T12:52:39.721Z",
+      "updatedAt": "2025-07-06T12:52:39.721Z"
+    }
+  ]
+}

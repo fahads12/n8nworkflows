@@ -1,0 +1,276 @@
+{
+  "name": "AI_Powered_Meeting_Planner",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "59edf937-fe25-4529-98dd-bd742c227e08"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -140
+      ],
+      "id": "95cb2cbd-7892-4e3c-b90f-8a3dcb5e0d15",
+      "name": "MCP Server Trigger",
+      "webhookId": "59edf937-fe25-4529-98dd-bd742c227e08"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        100
+      ],
+      "id": "4905468b-0f8b-4d51-9e91-2b065b64dc71",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "Paste Your SSE End Point From MCP Server Trigger"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        540,
+        100
+      ],
+      "id": "bf0a6edc-26db-418e-860b-107499c45a5f",
+      "name": "MCP Client"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        340,
+        100
+      ],
+      "id": "cc22d2a2-2ae8-4c23-b21c-e371983cf8c0",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Calendar', ``, 'string') }}",
+          "mode": "id",
+          "__regex": "(^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -360,
+        100
+      ],
+      "id": "ce78a8e4-46f5-4f52-9a94-dbc61b1e0a17",
+      "name": "Google Calendar"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        -160
+      ],
+      "id": "dafc34be-a10e-406a-9976-cc9c5dbcd6f4",
+      "name": "Telegram Trigger",
+      "webhookId": "4623cf2c-ba14-4b24-856c-a825b4681c31"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Chat_ID', ``, 'string') }}",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        20,
+        140
+      ],
+      "id": "7b2f550e-1642-4eab-b8a9-0760a10cc964",
+      "name": "Telegram1",
+      "webhookId": "a5346cff-8e31-41cc-999b-ac9344172e34"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=You are Jarvis, an AI assistant connected to a Telegram-based system. You can schedule meetings using the tools below. Your task is to extract the required details from the user's prompt and call tools as needed.\n\n### Tools You Can Use:\n\n1. create_calendar_event(title, date, time, name)\n→ Creates a calendar event with the provided details.\n\n2. send_email(to, subject, body)\n→ Sends a confirmation email about the event.\n\n3. send_reply(chatId, message)\n→ Replies to the Telegram user.\n\nYour job is to:\n- Understand the prompt (e.g., “set a call with Alex next Thursday at 3”)\n- Extract details: title, date (ISO), time (24hr), name/email\n- Create the calendar event\n- Send confirmation email\n- Reply on Telegram\n\nAlways use send_reply at the end. No explanations, no markdown — just tool calls."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        480,
+        -160
+      ],
+      "id": "3fff81cf-8c86-4267-93b5-7d81f39bf361",
+      "name": "Meeting Planner"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        -120,
+        160
+      ],
+      "id": "05e7b184-9997-49f4-8381-0c3920f531cf",
+      "name": "Write in Sheets"
+    },
+    {
+      "parameters": {
+        "fromEmail": "Write Your Email",
+        "toEmail": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To_Email', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "html": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('HTML', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSendTool",
+      "typeVersion": 2.1,
+      "position": [
+        -240,
+        140
+      ],
+      "id": "10b301f4-7b2b-440f-9525-cce1fefc39ca",
+      "name": "Send Email",
+      "webhookId": "fa895677-9969-42a6-87db-99b7db0fce57"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Meeting Planner",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "Meeting Planner",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Meeting Planner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram1": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write in Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "54e4b594-ad98-49f5-9879-b11bdac7666c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}

@@ -1,0 +1,363 @@
+{
+  "name": "Lead Qualification + Telegram Follow up",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-intake",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        80
+      ],
+      "id": "3b43594b-affd-4f72-a886-625a4e09bc0b",
+      "name": "Webhook",
+      "webhookId": "9c75ebdf-f8e6-4f4b-8934-d9d0fab53b72"
+    },
+    {
+      "parameters": {
+        "chatId": "{json.message.chat.id}",
+        "text": "=🎉 New Qualified Lead! \nName:  {{ $json.body.name }}\nEmail: {{ $json.body.email }}\nScore: {{ $json.body.score }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        660,
+        -20
+      ],
+      "id": "45d76533-ba6a-4b2d-9c68-ee5fa88c2ce5",
+      "name": "Telegram",
+      "webhookId": "4ea0cb5a-08b5-43e8-b648-01e152b417b5",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZpUtrEm3Y4OWaAYz",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1sS8JkvrZOfCTVkvFhQd7y5_tCPPKJzN6QEduXR84apc",
+          "mode": "list",
+          "cachedResultName": "N8N Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sS8JkvrZOfCTVkvFhQd7y5_tCPPKJzN6QEduXR84apc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sS8JkvrZOfCTVkvFhQd7y5_tCPPKJzN6QEduXR84apc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "First name",
+              "displayName": "First name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last name",
+              "displayName": "Last name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone number",
+              "displayName": "Phone number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        660,
+        180
+      ],
+      "id": "2bcbbbd8-7107-4278-8669-08ba0e6fc362",
+      "name": "Send Un-Qualified",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GkWQWgnTzPZpYLcA",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1sS8JkvrZOfCTVkvFhQd7y5_tCPPKJzN6QEduXR84apc",
+          "mode": "list",
+          "cachedResultName": "N8N Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sS8JkvrZOfCTVkvFhQd7y5_tCPPKJzN6QEduXR84apc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sS8JkvrZOfCTVkvFhQd7y5_tCPPKJzN6QEduXR84apc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "First name",
+              "displayName": "First name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last name",
+              "displayName": "Last name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone number",
+              "displayName": "Phone number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        880,
+        -20
+      ],
+      "id": "1375ef21-1936-405a-acb5-a592c93cab16",
+      "name": "Save Qualified Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GkWQWgnTzPZpYLcA",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f0d316b0-42f8-4e9c-bd0c-a41a89d867ac",
+              "leftValue": "={{ $json.body.score }}",
+              "rightValue": 7,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        80
+      ],
+      "id": "6a65e48a-48db-4b2e-8d4c-dff86b4ebc29",
+      "name": "Check Is-Qualified"
+    },
+    {
+      "parameters": {
+        "jsCode": "const lead = items[0].json;\nconst score = lead.score;\n\nreturn [\n  {\n    json: {\n      ...lead,\n      isQualified: score > 7\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        80
+      ],
+      "id": "a6357be0-6c6e-4730-aa87-abab519aa54f",
+      "name": "Check Lead Score"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.srv873320.hstgr.cloud",
+            "user-agent": "PostmanRuntime/7.44.1",
+            "content-length": "71",
+            "accept": "*/*",
+            "accept-encoding": "gzip, deflate, br",
+            "cache-control": "no-cache",
+            "content-type": "application/json",
+            "postman-token": "31a6a1e1-95ec-434e-afaa-595e008281b7",
+            "x-forwarded-for": "58.65.221.10",
+            "x-forwarded-host": "n8n.srv873320.hstgr.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "23297c410631",
+            "x-real-ip": "58.65.221.10"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "name": "Alice",
+            "email": "alice@email.com",
+            "score": 9
+          },
+          "webhookUrl": "https://n8n.srv873320.hstgr.cloud/webhook-test/lead-intake",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check Lead Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "Save Qualified Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Is-Qualified": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Un-Qualified",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Lead Score": {
+      "main": [
+        [
+          {
+            "node": "Check Is-Qualified",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "634ba3d5-def9-4104-bb0a-9d0741893432",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e3c709c77c6f98ded9eed545863116ba0f739143a915750c510c562a9619a440"
+  },
+  "id": "1BHW04IIINjPekiK",
+  "tags": []
+}

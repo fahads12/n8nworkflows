@@ -1,0 +1,162 @@
+{
+  "name": "Hotel_Booking_Confirmation_Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const lead = items[0].json;\nconst timestamp = Date.now().toString().slice(-5);\nconst bookingID = `HBK-${timestamp}`;\n\nreturn [{\n  json: {\n    ...lead,\n    booking_id: bookingID\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        360,
+        220
+      ],
+      "id": "85fdcd0f-5295-41a3-964e-5dac911dc712",
+      "name": "Generate Booking ID"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hotel-booking",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        140,
+        220
+      ],
+      "id": "c547e414-fe46-41c4-adb5-7fe6eeb518b1",
+      "name": "Receive Booking Data",
+      "webhookId": "badde0cd-6d54-4111-a05f-5d7c5019b516"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C090LF8DVFZ",
+          "mode": "list",
+          "cachedResultName": "n8n-testing"
+        },
+        "text": "=📢 New Booking Received! Name: {{$json[\"name\"]}} Room: {{$json[\"room_type\"]}} Check-in: {{$json[\"checkin_date\"]}} Check-out: {{$json[\"checkout_date\"]}}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1060,
+        220
+      ],
+      "id": "547a894a-b4d6-4313-bc7e-de9d7ed6c733",
+      "name": "Send Staff Notification",
+      "webhookId": "08d841f3-ab07-4870-bfe1-3e69ae2cc490"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        580,
+        220
+      ],
+      "id": "fcbf04e8-d042-4e82-98c1-ea4e0a397406",
+      "name": "Save to Air Table"
+    },
+    {
+      "parameters": {
+        "fromEmail": "Enter Your Email",
+        "toEmail": "Get Email From Airtable",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        220
+      ],
+      "id": "16dd6ff1-691c-4c60-855d-fa3ba81d7aa3",
+      "name": "Send Confirmation Email",
+      "webhookId": "a8ccf83b-25f4-4d5f-b58a-921be9d52a53"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Generate Booking ID": {
+      "main": [
+        [
+          {
+            "node": "Save to Air Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive Booking Data": {
+      "main": [
+        [
+          {
+            "node": "Generate Booking ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Air Table": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Confirmation Email": {
+      "main": [
+        [
+          {
+            "node": "Send Staff Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "dc9e6a97-f791-4be4-b153-35fe67f37a56",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}

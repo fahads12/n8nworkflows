@@ -1,0 +1,212 @@
+{
+  "name": "Booking Chatbot with Confirmation",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        560
+      ],
+      "id": "cb9e711d-a82d-4298-b558-861faec4d88c",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        300
+      ],
+      "id": "9d5e87dc-5b4d-458e-beb3-213f72fbc376",
+      "name": "Telegram Trigger",
+      "webhookId": "54009369-5f84-417f-bbe6-b356e58b0e94"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \n\"service\": \"\",\n  \"datetime\": \"\",\n  \"name\": \"\",\n  \"notes\": \"\",\n  \"Telegram Message\": \"\"\n  \n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        520,
+        580
+      ],
+      "id": "c22bd793-f794-4b76-a53c-71e7a81df685",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}\n{{ $json.message.chat.first_name }}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a professional booking assistant for a salon or service business. Your task is to extract clear, structured booking information from the user’s message and ensure the requested time slot is available by checking the booking database.\n\nThe user's message is:\n{{ $json.message.text }}\n\nPlease follow these instructions carefully:\n\n1. Identify the following details:\n   - **Service** (e.g., haircut, massage, facial)\n   - **Datetime** (convert natural language like \"tomorrow at 4\" into ISO 8601 format: YYYY-MM-DDTHH:MM:SS)\nConsider today's date: {{ $now }}\n   - **Name** (use \"Username\" as a placeholder if name isn't explicitly provided)\n   - **Notes** (any extra info provided in the message, otherwise keep it blank)\n\n2. Before finalizing the booking, check Google Sheets to see if another appointment already exists at the same `datetime`. If yes, do not assign that slot — instead, return a message that it’s already booked and suggest trying a different time.\n\n---\n\n### 🧾 Expected JSON Output Format:\n```json\n{\n  \"service\": \"haircut\",\n  \"datetime\": \"2025-07-06T16:00:00\",\n  \"name\": \"Username\",\n  \"notes\": \"Any special requirement if present otherwise say no special treatment\"\n   \"Telegram Message\": \"Dear \"Username\"\nYour Booking Has been Confirmed on \"datetime\" for \"service\"\"\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        340,
+        300
+      ],
+      "id": "20c7167b-2b50-4609-a159-f41b9baca0bc",
+      "name": "Booking Chatbot with Confirmation"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $('Booking Chatbot with Confirmation').item.json.output['Telegram Message'] }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1180,
+        300
+      ],
+      "id": "40c10f3f-9b81-404e-bbee-08dc52557750",
+      "name": "Send Confirmation",
+      "webhookId": "e33ae26d-def9-4626-8728-540323faeaaf"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        360,
+        560
+      ],
+      "id": "318a85cb-8b49-45e6-a0c2-e0899bfb563a",
+      "name": "Check Bookings"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        860,
+        300
+      ],
+      "id": "16d28518-610c-47b8-a920-d2f7d577f2d9",
+      "name": "Save Booking In Sheets"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Booking Chatbot with Confirmation",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Booking Chatbot with Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Booking Chatbot with Confirmation",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Booking Chatbot with Confirmation": {
+      "main": [
+        [
+          {
+            "node": "Save Booking In Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Bookings": {
+      "ai_tool": [
+        [
+          {
+            "node": "Booking Chatbot with Confirmation",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Booking In Sheets": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fef4a540-285f-4082-b1fa-ead3135c2a9a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}

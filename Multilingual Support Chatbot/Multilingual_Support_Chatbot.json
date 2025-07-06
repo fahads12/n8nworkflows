@@ -1,0 +1,170 @@
+{
+  "name": "Multilingual Support Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1460,
+        240
+      ],
+      "id": "e53429a9-baa8-48e7-b623-8c8f25b63e25",
+      "name": "Telegram Trigger",
+      "webhookId": "0e6bebf4-ba86-45bf-ae63-af368a141681",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZpUtrEm3Y4OWaAYz",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -932,
+        460
+      ],
+      "id": "465ec879-97f5-4265-bc91-1f45bb6fdefd",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "CJuKstCap2ed3P1Q",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "Open ai output",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -644,
+        240
+      ],
+      "id": "9d037728-6386-4e7c-8f62-750decd6d875",
+      "name": "Telegram",
+      "webhookId": "39412e25-047b-47a3-b488-23eb5192a3e7",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZpUtrEm3Y4OWaAYz",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.input }}\n{{ $json.chat_id }}\n{{ $json.username }}",
+        "options": {
+          "systemMessage": "=You are a professional multilingual support agent. \nYou always answer clearly, respectfully, and helpfully in English.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -1020,
+        240
+      ],
+      "id": "3d2e5e90-b92a-4833-b6f7-aa159dc4f74a",
+      "name": "Multilingual Support Chatbot"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "text": "{{$json.message.text}}",
+        "translateTo": "=English"
+      },
+      "type": "n8n-nodes-base.googleTranslate",
+      "typeVersion": 2,
+      "position": [
+        -1240,
+        240
+      ],
+      "id": "affc14cd-045f-4c5c-be2c-1a3487d79691",
+      "name": "Google Translate",
+      "credentials": {
+        "googleApi": {
+          "id": "PqdjxIoWXb6LpTuf",
+          "name": "Google Service Account account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Translate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Multilingual Support Chatbot",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Multilingual Support Chatbot": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Translate": {
+      "main": [
+        [
+          {
+            "node": "Multilingual Support Chatbot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0bb79cec-bd1f-4298-8da7-b1df2f94ac8a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e3c709c77c6f98ded9eed545863116ba0f739143a915750c510c562a9619a440"
+  },
+  "id": "xupArliBS1djT0jP",
+  "tags": []
+}

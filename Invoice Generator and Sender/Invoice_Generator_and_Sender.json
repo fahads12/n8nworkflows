@@ -1,0 +1,225 @@
+{
+  "name": "Invoice_Generator_and_Sender",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const name = $input.first().json['Full Name'];\nconst email = $input.first().json['Enter Your Email'];\nconst product = $input.first().json['Product Name'];\nconst amount = $input.first().json.Amount;\n\nconst invoiceNumber = `INV-${new Date().toISOString().slice(0,10).replace(/-/g, '')}-${Math.floor(Math.random()*1000)}`;\nconst date = new Date().toLocaleDateString();\n\nreturn [{\n  name,\n  email,\n  product,\n  amount,\n  invoiceNumber,\n  date\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1860,
+        180
+      ],
+      "id": "6508ec55-964b-4892-a1e4-5412514c8a3a",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "formId": "Q3KUzanr"
+      },
+      "type": "n8n-nodes-base.typeformTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2080,
+        180
+      ],
+      "id": "71be838a-8861-49a4-976d-d9db0a018a87",
+      "name": "Typeform Trigger",
+      "webhookId": "44a0f3f9-8625-45cf-a103-c47966c306c0"
+    },
+    {
+      "parameters": {
+        "html": "<html>\n  <head>\n    <style>\n      body { font-family: Arial, sans-serif; padding: 20px; }\n      h2 { color: #333; }\n      .section { margin-bottom: 15px; }\n      .label { font-weight: bold; }\n      .box { border: 1px solid #ccc; padding: 10px; margin-top: 10px; }\n    </style>\n  </head>\n  <body>\n    <h2>Invoice: {{ $json.invoiceNumber }}</h2>\n\n    <div class=\"section\">\n      <span class=\"label\">Date:</span> {{ $json.date }}\n    </div>\n\n    <div class=\"section\">\n      <span class=\"label\">Customer Name:</span> {{ $json.name }}<br>\n      <span class=\"label\">Email:</span> {{ $json.email }}\n    </div>\n\n    <div class=\"section box\">\n      <p><span class=\"label\">Product:</span> {{ $json.product }}</p>\n      <p><span class=\"label\">Amount:</span> ${{ $json.amount }}</p>\n    </div>\n\n    <p>Thank you for your purchase!</p>\n  </body>\n</html>\n"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -1640,
+        180
+      ],
+      "id": "376cc6b5-5098-4b34-bf72-82ac47dd6676",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "operation": "URL/HTML to PDF",
+        "convertType": "htmlToPDF",
+        "html": "={{ $json.html }}",
+        "advancedOptions": {
+          "name": "={{ $('Code').item.json.invoiceNumber }}"
+        }
+      },
+      "type": "n8n-nodes-pdfco.PDFco Api",
+      "typeVersion": 1,
+      "position": [
+        -1420,
+        180
+      ],
+      "id": "9a1a78f4-cc38-4af6-8525-bed774c375c9",
+      "name": "PDFco Api"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "={{ $json.name }}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1200,
+        180
+      ],
+      "id": "ec5515b8-51a0-4ab9-a638-87c044d5001b",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -980,
+        180
+      ],
+      "id": "07e9767f-a8c0-43e9-8f43-34ca358fb9d6",
+      "name": "Split Item"
+    },
+    {
+      "parameters": {
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -760,
+        280
+      ],
+      "id": "7716d993-9558-4d33-a37d-22d0e57b2720",
+      "name": "Upload file"
+    },
+    {
+      "parameters": {
+        "fromEmail": "Enter Your Email",
+        "toEmail": "={{ $('Typeform Trigger').item.json['Enter Your Email'] }}",
+        "emailFormat": "text",
+        "text": "=Hi, {{ $('Code').item.json.name }}. Thanks for Purchasing.\nYour Invoice is attached.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -760,
+        80
+      ],
+      "id": "efba997b-bd33-4206-b3a2-1c778a7b48ae",
+      "name": "Send email",
+      "webhookId": "aa657aaa-156b-49cc-93a1-33087f27fd76"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Typeform Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "PDFco Api",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDFco Api": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Split Item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Item": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c342d0a0-8212-451f-8e5e-732ea3d53750",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}

@@ -1,0 +1,220 @@
+{
+  "name": "Freelancer_Proposal_Tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "new-proposal",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        -60
+      ],
+      "id": "b41c6781-9dfc-4168-bf4a-419238bb0395",
+      "name": "Add New Proposal via Webhook",
+      "webhookId": "10c7e68c-043a-4275-8fb8-8e40f556a177"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -320,
+        200
+      ],
+      "id": "2ce58751-a472-4c02-a9e1-aacf7c9e9cf1",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const title = $json.title;\nconst status = $json.status;\nconst deadlineRaw = $json.deadline;\nconst today = $json.today;\n\nconst deadline = new Date(deadlineRaw).toISOString().split(\"T\")[0];\n\nreturn {\n  title,\n  status,\n  deadline,\n  today\n};\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        340,
+        200
+      ],
+      "id": "70b091c5-01fb-49a4-ba84-ad9a89c97dc8",
+      "name": "Code1",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8f24cb1a-3553-4825-931e-4309fa4fea9d",
+              "name": "today",
+              "value": "={{ new Date().toISOString().split(\"T\")[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "58ef6cc3-ee72-4099-bb5c-ad19e3d00ea2",
+              "name": "title",
+              "value": "={{ $json.property_title }}",
+              "type": "string"
+            },
+            {
+              "id": "149c70ac-008d-4c37-a335-320f99fd6a89",
+              "name": "status",
+              "value": "={{ $json.property_status }}",
+              "type": "string"
+            },
+            {
+              "id": "de81e361-0bf9-4223-b3ea-386314362d38",
+              "name": "deadline",
+              "value": "={{ $json.property_dead_line.start }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "ignoreConversionErrors": true
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        120,
+        200
+      ],
+      "id": "0c24ad68-1ced-44e2-8926-38f5a5661e2c",
+      "name": "Formatting Data"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        -100,
+        -60
+      ],
+      "id": "01705928-a27c-4d93-8cb0-0da1e09d04af",
+      "name": "Create Database Page"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "get",
+        "pageId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        -100,
+        200
+      ],
+      "id": "56bd8eb4-9de9-4603-8e17-04a4ca73a02f",
+      "name": "Notion"
+    },
+    {
+      "parameters": {
+        "fromEmail": "Enter Your Email",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        560,
+        200
+      ],
+      "id": "d52bee55-2361-4db9-bcc6-d12b898e3d48",
+      "name": "Send email",
+      "webhookId": "f1198ea3-9f88-4134-bedb-3257ddead8b0"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Add New Proposal via Webhook": {
+      "main": [
+        [
+          {
+            "node": "Create Database Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatting Data": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion": {
+      "main": [
+        [
+          {
+            "node": "Formatting Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4b91dfaf-48b2-4840-8e93-7a0ee2ee3d8b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}

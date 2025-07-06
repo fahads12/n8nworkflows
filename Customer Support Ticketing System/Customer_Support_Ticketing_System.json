@@ -1,0 +1,222 @@
+{
+  "name": "Customer_Support_Ticketing_System",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "254c6f52-268c-4eb3-8449-c753234728c3",
+              "name": "From",
+              "value": "={{ $json.From }}",
+              "type": "string"
+            },
+            {
+              "id": "ce2810c5-8d0e-4bb3-ba84-199bf0428e55",
+              "name": "Subject",
+              "value": "={{ $json.Subject }}",
+              "type": "string"
+            },
+            {
+              "id": "e4a153f1-645a-4f93-97b2-f9105da30103",
+              "name": "Description",
+              "value": "={{ $json.snippet }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -800,
+        120
+      ],
+      "id": "42050eca-b132-474e-b190-0b4f4bc8d6ff",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e812078a-f018-417d-b498-e0e64cc4e2d8",
+              "leftValue": "={{ $json.From }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -580,
+        120
+      ],
+      "id": "32bb3fd2-19fd-4682-8947-7913adc7bf9b",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C090LF8DVFZ",
+          "mode": "list",
+          "cachedResultName": "n8n-testing"
+        },
+        "text": "Failed to create ticket – missing data from email.|",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -360,
+        220
+      ],
+      "id": "e1680e0c-c563-499d-a4f7-30a11a7bae54",
+      "name": "For Error Handling",
+      "webhookId": "f84fb339-1c26-45a2-8022-3e4004ef8f94"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C090LF8DVFZ",
+          "mode": "list",
+          "cachedResultName": "n8n-testing"
+        },
+        "text": "=📩 *New Support Ticket Received* \n*From:* {{ $json.property_requester_email }}\n*Subject:* {{ $json.name }}\n*Description:* {{ $json.property_description }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -140,
+        20
+      ],
+      "id": "1cc80829-fc53-49cc-ba6a-13eae19f0a52",
+      "name": "Notifying Team",
+      "webhookId": "831cd828-6195-4096-bbc1-6e8892fae9a0"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1020,
+        120
+      ],
+      "id": "39e3e7d4-a2a5-427a-a421-0fad061b7a24",
+      "name": "Gmail Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        -360,
+        20
+      ],
+      "id": "40cf51e9-a5ed-44d1-a536-ae62513e709c",
+      "name": "Support Ticket Database"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Support Ticket Database",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "For Error Handling",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Support Ticket Database": {
+      "main": [
+        [
+          {
+            "node": "Notifying Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9b127e74-dc78-4fe8-ac7e-2fc7444ca795",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}

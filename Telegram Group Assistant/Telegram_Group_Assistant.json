@@ -1,0 +1,177 @@
+{
+  "name": "Telegram_Group_Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -260,
+        -80
+      ],
+      "id": "c098bb68-0082-49b5-8b6b-b18912f34b79",
+      "name": "Telegram Trigger",
+      "webhookId": "f83f8c8a-be72-4cbf-b9a9-57efe23d46f2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = $json.message.text;\nconst cleaned = message.replace(/@YourBotUsername/gi, \"\").trim();\nreturn [{ json: { query: cleaned } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -40,
+        -80
+      ],
+      "id": "94b7114f-c89d-445f-a660-d5f659e3c011",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "{{$json.message.text}}",
+        "options": {
+          "systemMessage": "You are a smart and friendly assistant inside a Telegram group. \nYour job is to help members by answering their questions clearly, briefly, and respectfully. \nAlways be polite and helpful, and assume the user is looking for information related to the group. \nIf you are unsure of the exact answer, try your best to provide helpful context or a useful direction.\n\nDo not mention that you are an AI or language model. \nRespond as if you're a helpful human group admin who knows everything about the community.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        200,
+        -80
+      ],
+      "id": "128f4633-37ae-4d61-b4a2-027bddaeb86d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        120,
+        220
+      ],
+      "id": "053d7979-43ac-494c-b92f-31ce23441790",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "chatId": "={{$json.chat_id}}",
+        "text": "=@{{$json.username}} 👉 {{$json.answer}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        -80
+      ],
+      "id": "5eb2cb0c-8f4f-451e-b6bc-7885a28bc5cc",
+      "name": "Telegram",
+      "webhookId": "b6b1535d-becf-4e57-9deb-97dc72c88864"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        280,
+        220
+      ],
+      "id": "23c020a8-d5a3-465f-8ba3-8a9dab884039",
+      "name": "Read"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b5038bb4-4c31-4ddf-b847-2d7d11773f08",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}

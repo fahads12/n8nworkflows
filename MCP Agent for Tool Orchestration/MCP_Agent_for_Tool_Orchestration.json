@@ -1,0 +1,276 @@
+{
+  "name": "MCP_Agent_for_Tool_Orchestration",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "59edf937-fe25-4529-98dd-bd742c227e08"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1020,
+        -20
+      ],
+      "id": "0305d56c-156d-4a19-8710-731ed439713f",
+      "name": "MCP Server Trigger",
+      "webhookId": "59edf937-fe25-4529-98dd-bd742c227e08"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        200
+      ],
+      "id": "3d04e8c4-0135-4212-bbf4-cc63047c6cbf",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://n8n.srv873320.hstgr.cloud/mcp/59edf937-fe25-4529-98dd-bd742c227e08/sse"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        -220,
+        160
+      ],
+      "id": "d3c5ca83-17df-49e2-a1ba-2425ab0ca32d",
+      "name": "MCP Client"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -340,
+        160
+      ],
+      "id": "bcee4a80-b462-4fd0-bd69-b24bbbd09f90",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Calendar', ``, 'string') }}",
+          "mode": "id",
+          "__regex": "(^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -1060,
+        200
+      ],
+      "id": "44bc484a-9c79-4864-9bab-69b79f737884",
+      "name": "Google Calendar"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -580,
+        40
+      ],
+      "id": "a6aac7f3-f505-40e2-a77f-43a1300e4179",
+      "name": "Telegram Trigger",
+      "webhookId": "4623cf2c-ba14-4b24-856c-a825b4681c31"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Chat_ID', ``, 'string') }}",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        -940,
+        200
+      ],
+      "id": "a6796165-4045-448e-8141-88ce59df151f",
+      "name": "Telegram1",
+      "webhookId": "a5346cff-8e31-41cc-999b-ac9344172e34"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=You are an intelligent AI assistant named Jarvis, operating within a Telegram-based automation system.\n\nYou interact with users through Telegram and respond by calling specific tools designed to automate tasks across different platforms. You are also connected to a PostgreSQL database for long-term memory — use this memory to understand user preferences, context, and follow-up intent over time.\n\n---\n\n### ⚙️ Tools Available:\n\n1. 🔹 send_email  \n→ Sends an email via SMTP using recipient, subject, and body.\n\n2. 🔹 update_sheet  \n→ Logs a new row in a Google Sheet that stores user prompts and system actions.\n\n3. 🔹 update_sheet_row  \n→ Updates existing data in a specific row of a Google Sheet.\n\n4. 🔹 upload_file  \n→ Uploads a file to Google Drive in a designated folder.\n\n5. 🔹 send_reply  \n→ Sends a response message back to the Telegram user.\n\n6. You also use a memory system to keep track of past chats and maintain context over time.\n\n---\n\n### 🧠 Behavior Guidelines:\n\n- When the user sends a message, understand their intent and determine which tool(s) to call to fulfill the request.\n- After completing actions, always send a confirmation message to the user using the `send_reply` tool.\n- Use the provided `chatId` to ensure the message is sent to the correct user.\n- Chain tools together when needed to complete multi-step tasks.\n- Be concise, accurate, and action-focused.\n- Do not provide reasoning, explanation, or markdown — only output tool calls.\n\n---\n\n### 🔄 Dynamic References:\n\n- **User Prompt**: Use {{ $json.message.text }} to understand the instruction.\n- **Telegram chat ID**: Use {{ $json.message.chat.id }}  when replying to the user.\n\n---\n\nAlways behave as a professional, calm, and efficient assistant. Your role is to execute tasks requested by your user, using the tools provided. Maintain clarity, precision, and reliability in every action.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -360,
+        -60
+      ],
+      "id": "46e16a72-67c2-4564-b515-d501bd0f54b9",
+      "name": "MCP Agent"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        -820,
+        200
+      ],
+      "id": "2238f925-b744-4397-add0-dd3e5478b217",
+      "name": "Append row in Google Sheets"
+    },
+    {
+      "parameters": {
+        "fromEmail": "Enter Your Email",
+        "toEmail": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To_Email', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "html": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('HTML', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSendTool",
+      "typeVersion": 2.1,
+      "position": [
+        -700,
+        200
+      ],
+      "id": "d4a97fc7-6d91-4bf9-b6bd-57254246fc99",
+      "name": "Send Email",
+      "webhookId": "fa895677-9969-42a6-87db-99b7db0fce57"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "MCP Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "MCP Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram1": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "03ff76f1-81c0-49ab-b9ca-34c497c053ee",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}

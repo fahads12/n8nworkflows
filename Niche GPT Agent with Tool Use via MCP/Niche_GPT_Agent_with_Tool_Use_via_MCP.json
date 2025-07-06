@@ -1,0 +1,359 @@
+{
+  "name": "Niche_GPT_Agent_with_Tool_Use_via_MCP",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gptniche",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1240,
+        140
+      ],
+      "id": "15d63d4f-f77f-4ec0-be04-c4221f0539f2",
+      "name": "Webhook",
+      "webhookId": "bf72a430-bd97-4d90-9b8e-8550e2ad00a0"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.user_prompt }}",
+        "options": {
+          "systemMessage": "=You are a tool-using AI agent. Analyze the user's instruction and determine which action to take: \n1. Search Notion \n2. Send Email \n3. Call an external API\n\nOnly respond in JSON like this:\n{\n  \"tool\": \"notion\" | \"email\" | \"api\",\n  \"query\": \"search text or message\",\n  \"email\": {\n    \"to\": \"...\",\n    \"subject\": \"...\",\n    \"body\": \"...\"\n  },\n  \"api\": {\n    \"url\": \"...\",\n    \"method\": \"GET/POST\",\n    \"headers\": {},\n    \"body\": {}\n  }\n}\n\nUser prompt: {{ $json.body.user_prompt }}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -1020,
+        140
+      ],
+      "id": "b4787f4b-2ebb-493d-8082-bc96bf037c50",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -940,
+        360
+      ],
+      "id": "a0eb8c53-685e-44d3-9fec-11fab444a02c",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "jsCode": "let raw = $input.first().json.output;\n\n// Check if it's a string (e.g., AI returned stringified JSON)\nif (typeof raw === \"string\") {\n  try {\n    raw = JSON.parse(raw); // Parse to object\n  } catch (e) {\n    throw new Error(\"Invalid JSON format in 'output'\");\n  }\n}\n\n// Make sure it's a valid object\nif (typeof raw !== \"object\" || raw === null) {\n  throw new Error(\"'output' is not a valid object\");\n}\n\n// Return as flattened JSON\nreturn [{ json: raw }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -660,
+        140
+      ],
+      "id": "af919824-ebb6-4b5e-b710-5b8d0e769ac3",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tool }}",
+                    "rightValue": "notion",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a420eab6-2f46-4017-88ae-a8d1a81987d8"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Notion"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "bd3e0c44-1c6c-4987-a3ab-5a701dda9ccb",
+                    "leftValue": "={{ $json.tool }}",
+                    "rightValue": "email",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Email"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "13904358-9a39-4be1-b41b-6662c8e35d92",
+                    "leftValue": "={{ $json.tool }}",
+                    "rightValue": "api",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "API"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -440,
+        140
+      ],
+      "id": "f407fa8f-20bf-435f-b2a0-5d995fb3c323",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "method": "={{ $('Code').item.json.api.method }}",
+        "url": "={{ $('Code').item.json.api.url }}",
+        "sendHeaders": true,
+        "specifyHeaders": "={{ $('Code').item.json.api.headers }}",
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "contentType": "={{ $('Code').item.json.api.body }}",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -220,
+        340
+      ],
+      "id": "96b294fd-a9ca-4ecc-944c-4433d73b2dcc",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"success\",\n  \"tool_used\": \"{{ $('Code').item.json.tool }}\",\n  \"message\": \"{{ $json.message || 'Task executed successfully.' }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        140
+      ],
+      "id": "e9776f68-19dc-47bf-81e4-c0cc2b35ed74",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "get",
+        "pageId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        -220,
+        -60
+      ],
+      "id": "6079cae4-091c-4c6e-bed8-a4ef053f237b",
+      "name": "Get a database page"
+    },
+    {
+      "parameters": {
+        "fromEmail": "Enter Your Email",
+        "toEmail": "={{ $('Code').item.json.email.to }}",
+        "subject": "={{ $('Code').item.json.email.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $('Code').item.json.email.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -220,
+        140
+      ],
+      "id": "f3a0172b-dd2c-4fd4-b583-b53c0c333412",
+      "name": "Send email",
+      "webhookId": "a870f0dd-2f91-420a-8855-8c8fbf4696f8"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Get a database page",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a database page": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6b3860a0-648c-4ad4-ad62-502c283a008b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}

@@ -1,0 +1,173 @@
+{
+  "name": "Travel Booking Agent with Long-Term Memory",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "91412d83-11f5-4039-aca6-b202705c7168",
+      "name": "Telegram Trigger",
+      "webhookId": "90ebcee3-7b49-4f7e-8bfd-d2c28bc4f2ef",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZpUtrEm3Y4OWaAYz",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        596,
+        0
+      ],
+      "id": "997ac8cc-7afd-4f53-82e9-eb5d152c1631",
+      "name": "Telegram",
+      "webhookId": "53cd91de-b6f2-40e7-8e31-c93e406f3ae7",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZpUtrEm3Y4OWaAYz",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        280
+      ],
+      "id": "85293b93-ed14-4cfe-840d-f45e9937dfcd",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "CJuKstCap2ed3P1Q",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=={{ $json[\"message\"][\"chat\"][\"id\"].toString() }}\n",
+        "tableName": "memory",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        260
+      ],
+      "id": "ace7ac5d-6d88-4db5-98a3-047175b69c60",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "CVXkcp6zGCECgMWU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}\n",
+        "options": {
+          "systemMessage": "You are a smart, helpful, and proactive travel assistant named \"GlobeMate.\" You assist users in planning personalized travel experiences based on their preferences, history, and budget. Your personality is friendly, concise, and professional.\n\nYour core functions:\n1. Plan detailed trips including destinations, activities, hotels, transportation, and cost estimates.\n2. Adapt suggestions based on user preferences such as budget, luxury, adventure, family, or romantic trips.\n3. Remember past user requests to improve suggestions (e.g., preferred regions, travel style).\n4. Ask clarifying questions if the user's message is vague.\n5. Keep your answers concise and actionable unless the user asks for detail.\n6. Never fabricate information about real bookings or flight availability unless connected to a real booking API.\n7. Always be timezone- and currency-aware (assume user is in Pakistan unless stated).\n8. If past memory is included, use it to make your response more relevant and personal.\n9. Be multilingual if needed, but default to friendly English.\n\nExamples of things you can do:\n- Suggest a 7-day adventure trip to Thailand for under $1000\n- Recommend off-season destinations for budget travel\n- Create weekend getaway plans from Lahore or Karachi\n- Offer packing tips or visa requirements based on destination\n\nImportant rules:\n- If the user asks for real-time availability or prices, say: \"I'm an AI assistant and cannot access real-time booking data, but I can help plan the trip and recommend where to book.\"\n- If memory is available, use it to refer to previous trips or preferences.\n- Always end responses by offering to assist further: \"Would you like me to refine this plan or suggest alternatives?\"\n\nYou are currently integrated into a Telegram chat and respond as a helpful, personal travel companion.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "55c261c5-f09e-4d77-9a23-e15ce452c626",
+      "name": "Travel Booking Agent with Long-Term Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Travel Booking Agent with Long-Term Memory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Travel Booking Agent with Long-Term Memory",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Travel Booking Agent with Long-Term Memory",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Travel Booking Agent with Long-Term Memory": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8b605f7c-afdf-46f2-b3dd-1a68889a640a",
+  "meta": {
+    "instanceId": "e3c709c77c6f98ded9eed545863116ba0f739143a915750c510c562a9619a440"
+  },
+  "id": "3LdCB7bJdi4cpADL",
+  "tags": []
+}

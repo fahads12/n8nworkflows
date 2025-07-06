@@ -1,0 +1,153 @@
+{
+  "name": "Product_Recommender_Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        440,
+        220
+      ],
+      "id": "dd9a548b-f903-425a-b69d-1b168bc3aa11",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        280,
+        -60
+      ],
+      "id": "b7322407-1c63-4c5a-a2f5-be796e0d4f21",
+      "name": "Telegram Trigger",
+      "webhookId": "54009369-5f84-417f-bbe6-b356e58b0e94"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "=Extract the following from this user query:\n- Category or product type\n- Budget (in USD)\n- Any specific features\n\nCheck google sheets for that specific product and Tell the Customer in formal and professional way."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        500,
+        -60
+      ],
+      "id": "2a530a81-640c-4d00-9953-defac9076f7c",
+      "name": "Product Recommender Chatbot"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        -60
+      ],
+      "id": "1055fd37-9491-4f70-9f7a-548e98a7a8a5",
+      "name": "Send",
+      "webhookId": "c99baeed-5968-4890-9386-ee8a834ee095"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        720,
+        240
+      ],
+      "id": "e14fa595-9def-41cb-b8da-5a565c996fec",
+      "name": "Read Sheets"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Product Recommender Chatbot",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Product Recommender Chatbot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Product Recommender Chatbot": {
+      "main": [
+        [
+          {
+            "node": "Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "Product Recommender Chatbot",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fd6122b7-cc27-4732-ab88-76f100e064fc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}

@@ -1,0 +1,274 @@
+{
+  "name": "AI SEO Optimizer for Blog Posts",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "59edf937-fe25-4529-98dd-bd742c227e08"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 1,
+      "position": [
+        600,
+        0
+      ],
+      "id": "eb52c4d8-391f-43f9-a582-845d471f99ab",
+      "name": "MCP Server Trigger",
+      "webhookId": "59edf937-fe25-4529-98dd-bd742c227e08"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        200,
+        340
+      ],
+      "id": "45684662-c683-42ac-97be-824aa676d78e",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://n8n.srv873320.hstgr.cloud/mcp/59edf937-fe25-4529-98dd-bd742c227e08/sse"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        0,
+        340
+      ],
+      "id": "28dc9ac9-c573-45ee-ab42-56c7788edb41",
+      "name": "MCP Client"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -140,
+        340
+      ],
+      "id": "b9310516-dda0-42d5-b49f-0f36c2414c8d",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Calendar', `, 'string') }}",
+          "mode": "id",
+          "__regex": "(^[a-zA-Z0-9.!#$%&’*+/=?^_{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        340
+      ],
+      "id": "008d0eb9-793e-4ccd-a7f8-e129c66f6438",
+      "name": "Google Calendar"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -360,
+        220
+      ],
+      "id": "5fcd4dfa-a35d-4329-a872-7d99c2be7bc5",
+      "name": "Telegram Trigger",
+      "webhookId": "4623cf2c-ba14-4b24-856c-a825b4681c31"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Chat_ID', `, 'string') }}",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', `, 'string') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        740,
+        340
+      ],
+      "id": "7a6f93db-9665-4d41-a7f2-9c8f4514682f",
+      "name": "Telegram1",
+      "webhookId": "a5346cff-8e31-41cc-999b-ac9344172e34"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=You are Jarvis, an AI-powered SEO assistant. When a user submits a blog post via telegram, your job is to analyze it using the available tools.\n\n### Tools You Can Use:\n\n1. analyze_seo(text, keyword)\n→ Analyzes SEO strength of the blog post: keyword density, readability, structure.\n\n2. send_reply via telegram\n→ Replies to the user with your SEO suggestions.\n\n### Behavior:\n- Always begin by analyzing the post using analyze_seo.\n- Then, send the summarized feedback using send_reply.\n- Don’t include explanations or markdown — just call the tools in correct sequence.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d4d06665-bf00-41b5-afdc-1aca272443be",
+      "name": "AI SEO Optimizer for Blog Posts"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        600,
+        340
+      ],
+      "id": "9f1ab880-a7a5-44a0-b169-02b2e2fb7cf5",
+      "name": "Append row in sheet in Google Sheets"
+    },
+    {
+      "parameters": {
+        "fromEmail": "Enter Your Email",
+        "toEmail": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To_Email', `, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', `, 'string') }}",
+        "html": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('HTML', `, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSendTool",
+      "typeVersion": 2.1,
+      "position": [
+        460,
+        340
+      ],
+      "id": "65537ef6-868b-4d38-ad53-15dab1dae85f",
+      "name": "Send email in Send Email",
+      "webhookId": "fa895677-9969-42a6-87db-99b7db0fce57"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI SEO Optimizer for Blog Posts",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI SEO Optimizer for Blog Posts",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI SEO Optimizer for Blog Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram1": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email in Send Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "54f0abcc-15ad-428a-a43b-192895661f85",
+  "meta": {
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}

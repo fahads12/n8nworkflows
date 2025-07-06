@@ -1,0 +1,163 @@
+{
+  "name": "Typeform_to_CRM_Lead_Logger",
+  "nodes": [
+    {
+      "parameters": {
+        "formId": "Q3KUzanr"
+      },
+      "id": "7140405d-a581-423a-991f-5259f2a9755c",
+      "name": "Collects lead information",
+      "type": "n8n-nodes-base.typeformTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "REPLACE_WITH_WEBHOOK_ID",
+      "credentials": {
+        "typeformApi": {
+          "id": "0qsP0o1MlMG9YnUs",
+          "name": "Typeform account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": "REPLACE_WITH_DOCUMENT_ID",
+        "sheetName": "Sheet1",
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Booking",
+              "displayName": "Booking",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Start",
+              "displayName": "Start",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        260,
+        0
+      ],
+      "id": "f2e2b3ad-e8b4-4d5a-a5b8-b01ad37e902c",
+      "name": "Logs lead into CRM sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "PqdjxIoWXb6LpTuf",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": "REPLACE_WITH_SLACK_CHANNEL_ID",
+        "text": "=🚀 New Lead Submitted\n\n👤 Name: {{$json.form_response.answers[0].text}}  \n📧 Email: {{$json.form_response.answers[1].email}}  \n🏢 Company: {{$json.form_response.answers[2].text}}  \n📞 Phone: {{$json.form_response.answers[3].text}}  \n🎯 Interested In: {{$json.form_response.answers[4].text}}  \n📝 Message: {{$json.form_response.answers[5].text}}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        500,
+        0
+      ],
+      "id": "a1b91b19-7d35-4018-8f7d-fc49c7a73961",
+      "name": "Notifies the relevant team",
+      "webhookId": "REPLACE_WITH_SLACK_WEBHOOK_ID",
+      "credentials": {
+        "slackApi": {
+          "id": "q3lfsbvy7ASOwj8e",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Collects lead information": {
+      "main": [
+        [
+          {
+            "node": "Logs lead into CRM sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Logs lead into CRM sheet": {
+      "main": [
+        [
+          {
+            "node": "Notifies the relevant team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b4ad5db7-e3d8-445c-b380-3dcbae0dc48b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e3c709c77c6f98ded9eed545863116ba0f739143a915750c510c562a9619a440"
+  },
+  "id": "gqtqMcqnR3IwvCus",
+  "tags": [
+    {
+      "createdAt": "2025-07-05T20:38:36.062Z",
+      "updatedAt": "2025-07-05T20:38:36.062Z",
+      "id": "jpAEnVwdaElyAJfI",
+      "name": "TypeForm, G Sheet, Slack"
+    }
+  ]
+}

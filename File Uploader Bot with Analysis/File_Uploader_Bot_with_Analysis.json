@@ -1,0 +1,195 @@
+{
+  "name": "File Uploader Bot with Analysis",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        100,
+        60
+      ],
+      "id": "8b3c596b-4a62-46b3-a711-b552e9d74293",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        280,
+        320
+      ],
+      "id": "b7666ffe-3c12-4fbc-bfc0-3243e0fc4c16",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "LWVlc96EG20VG7du",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -340,
+        60
+      ],
+      "id": "e8057537-dfb2-4272-8702-2c489227d057",
+      "name": "Telegram Trigger",
+      "webhookId": "54009369-5f84-417f-bbe6-b356e58b0e94",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZpUtrEm3Y4OWaAYz",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.document.file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -120,
+        60
+      ],
+      "id": "cd835f74-304e-4523-a3d0-e479e7a4b02d",
+      "name": "Download File From Telegram",
+      "webhookId": "2dfbc8d0-d2fa-41e1-ae35-23821ec686ce",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZpUtrEm3Y4OWaAYz",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "=Extract the following details from this invoice:\n- Invoice Number\n- Date\n- Vendor Name\n- Total Amount\n\nHere is the text:\n{{ $json.text }}\nWrite back to telegram in this format\n*Invoice Summary*  \nInvoice #: \nVendor: \nDate:   \nAmount: \nIf no information is present for the specific field just leave empty the space.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        320,
+        60
+      ],
+      "id": "2632c39e-10bb-4acf-8cf4-e7f44b14d81b",
+      "name": "File Uploader  Bot with Analysis"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        696,
+        60
+      ],
+      "id": "440758a5-ea45-4e99-a5b3-e16950f371a5",
+      "name": "Send Summary",
+      "webhookId": "c99baeed-5968-4890-9386-ee8a834ee095",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZpUtrEm3Y4OWaAYz",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "File Uploader  Bot with Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "File Uploader  Bot with Analysis",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download File From Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File From Telegram": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Uploader  Bot with Analysis": {
+      "main": [
+        [
+          {
+            "node": "Send Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f7f72a82-f21f-4f25-bc1b-2ed62241a4ec",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e3c709c77c6f98ded9eed545863116ba0f739143a915750c510c562a9619a440"
+  },
+  "id": "IqK4O8iVAKGrvCXO",
+  "tags": []
+}

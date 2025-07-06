@@ -1,0 +1,160 @@
+{
+  "name": "Tax_Filing_Document_Collector",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tax-doc-upload",
+        "options": {
+          "binaryPropertyName": "data",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        60
+      ],
+      "id": "877e259a-ce73-4e9a-884f-d2a7cbc11dff",
+      "name": "Receives Tax File",
+      "webhookId": "683240c7-3c27-47c7-9626-a4617a21e8fa"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "981b9398-da94-492e-aa19-3e0842657fd7",
+              "name": "Name",
+              "value": "={{ $('Receives Tax File').item.json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "70f75547-d345-4a8f-bf3b-99d893ccc648",
+              "name": "Email",
+              "value": "={{ $('Receives Tax File').item.json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "6b3c52af-e1d0-406d-88f5-6d0b2efed087",
+              "name": "Uploaded File Name",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "2f67caa8-79f6-4455-a3d8-a9b746cf7622",
+              "name": "Doc List Expected",
+              "value": "={{ $('Receives Tax File').item.json.body.docListExpected }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        60
+      ],
+      "id": "e76145b8-1483-4a91-b7e0-89a73df061d0",
+      "name": "Formatting"
+    },
+    {
+      "parameters": {
+        "fromEmail": "Enter Your Email",
+        "toEmail": "={{ $json.Email }}",
+        "subject": "Your Tax Document Submission Checklist",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        520,
+        60
+      ],
+      "id": "be5473ce-5817-440d-894b-328560de5dc1",
+      "name": "Confirmation",
+      "webhookId": "b4f7bc06-2f32-4240-996c-c015e6636557"
+    },
+    {
+      "parameters": {
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        80,
+        60
+      ],
+      "id": "31757c13-7b91-4ef0-a047-aad7a209bfa8",
+      "name": "Upload file"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receives Tax File": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatting": {
+      "main": [
+        [
+          {
+            "node": "Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Formatting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5bea1fa9-aa96-4b5c-aee4-fb3059836c84",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}

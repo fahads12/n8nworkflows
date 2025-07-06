@@ -1,0 +1,178 @@
+{
+  "name": "CRM Query Chatbot for Sales Reps",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        20,
+        380
+      ],
+      "id": "899a6927-2c4c-4e71-9537-7ade9b9594d4",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -100,
+        140
+      ],
+      "id": "fb9f3dd3-9556-426d-9a60-c61dbaf66260",
+      "name": "Telegram Trigger",
+      "webhookId": "54009369-5f84-417f-bbe6-b356e58b0e94"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"user\": \"\",\n\t\"Message\":\"\",\n    \"Sentiment\":\"\",\n    \"TimeStamp\":\"\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        380,
+        400
+      ],
+      "id": "0ae84b5d-3d5d-4535-8891-58f8805261c0",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output.Message }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        140
+      ],
+      "id": "b43864a4-d1b8-4856-b6d2-62b2e2ced0bd",
+      "name": "Telegram",
+      "webhookId": "361672d1-6a50-42be-892e-42121ab8b45e"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}\n{{ $now }} \n{{ $json.message.from.first_name }}\n{{ $json.message.from.last_name }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a CRM assistant. Interpret the sales rep's query and convert it into structured filter logic.\nYou're also connected with google sheets.\n\nQuery: \"{{ $json.message }}\"\n\nReturn output in JSON:\n{\n  \"date_range\": \"today / yesterday / last 7 days / all\",\n  \"lead_status\": \"hot / cold / all\",\n  \"output_format\": \"summary / full list\",\n  \"columns\": [\"name\", \"email\", \"status\", \"date\"]\n}\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        160,
+        140
+      ],
+      "id": "6305f2f4-3a4b-49a8-b860-fc78a88fb029",
+      "name": "CRM Query Chatbot for Sales Reps"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        200,
+        400
+      ],
+      "id": "0eedcc2c-7eff-481e-be58-aa5cd3fefdfc",
+      "name": "Google Sheets"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "CRM Query Chatbot for Sales Reps",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "CRM Query Chatbot for Sales Reps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "CRM Query Chatbot for Sales Reps",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CRM Query Chatbot for Sales Reps": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "CRM Query Chatbot for Sales Reps",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1e0d36e3-3ddc-408b-9d64-0e6d3c26b429",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}

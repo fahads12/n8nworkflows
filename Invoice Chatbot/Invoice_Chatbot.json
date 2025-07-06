@@ -1,0 +1,263 @@
+{
+  "name": "Invoice_Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -680,
+        240
+      ],
+      "id": "0a753dab-c69c-463c-a9b9-4f0c32e42107",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \n\"invoice_id\":\"\", \n\"client_name\":\"\", \n\"status\":\"\", \n\"pdf_url\":\"\", \n\"amount\":\"\", \n\"date\":\"\"\n  \n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -280,
+        220
+      ],
+      "id": "be055ea1-c815-4022-845d-0d49b60efb92",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Extract the invoice ID (number only) from this query:\n\"{{ $json.message.text }}\"\nYou're also connected with the Google sheets. \nCheck the invoice id from google sheet and then prepare the output\nReturn output in JSON:\n{\n  \ninvoice_id, \nclient_name, \nstatus, \npdf_url, \namount, \ndate\n\n}\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -520,
+        -60
+      ],
+      "id": "1f5d7481-3e69-41f4-bc39-07b5e66c6d72",
+      "name": "Invoice Chatbot"
+    },
+    {
+      "parameters": {
+        "operation": "URL/HTML to PDF",
+        "advancedOptions": {}
+      },
+      "type": "n8n-nodes-pdfco.PDFco Api",
+      "typeVersion": 1,
+      "position": [
+        120,
+        -60
+      ],
+      "id": "83439daa-8750-48ba-bddc-e66a8e1d77b9",
+      "name": "PDFco Api"
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n\n<html>\n<head>\n  <meta charset=\"UTF-8\" />\n  <title>INVOICE BOT</title>\n</head>\n<body>\n  <div class=\"container\">\n    <h1>Invoice:{{ $json.output.invoice_id }}</h1>\n    <h2>Name:{{ $json.output.client_name }}</h2>\n    <h2>Status:{{ $json.output.status }}</h2>\n    <h2>URL:{{ $json.output.pdf_url }}</h2>\n    <h2>Amount:{{ $json.output.amount }}</h2>\n    <h2>Date:{{ $json.output.date }}</h2>\n    <p>Thanks For Using</p>\n  </div>\n</body>\n</html>\n\n<style>\n.container {\n  background-color: #ffffff;\n  text-align: center;\n  padding: 16px;\n  border-radius: 8px;\n}\n\nh1 {\n  color: #ff6d5a;\n  font-size: 24px;\n  font-weight: bold;\n  padding: 8px;\n}\n\nh2 {\n  color: #909399;\n  font-size: 18px;\n  font-weight: bold;\n  padding: 8px;\n}\n</style>\n\n<script>\nconsole.log(\"Hello World!\");\n</script>"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -100,
+        -60
+      ],
+      "id": "92295ce2-7969-41d7-9061-650512830882",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "={{ $json.name }}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        340,
+        -60
+      ],
+      "id": "d7f6f284-3d9c-4fb2-a643-b7b7a13d66d0",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "binaryPropertyName": "={{ $json.name }}",
+        "additionalFields": {
+          "caption": "Here's Your Invoice"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        -60
+      ],
+      "id": "42867365-d123-4147-8fb3-61ca1f6085b6",
+      "name": "Telegram",
+      "webhookId": "e33ae26d-def9-4626-8728-540323faeaaf"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        -480,
+        260
+      ],
+      "id": "265722d7-9c7e-440c-b0df-f462b11a1782",
+      "name": "Read Sheets"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -760,
+        -60
+      ],
+      "id": "a8b0d75b-b692-4d9f-a2f1-e7c35063761c",
+      "name": "Telegram Trigger",
+      "webhookId": "556f7395-3f8a-4d31-8547-81c7b7d90ac3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Invoice Chatbot",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Invoice Chatbot",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoice Chatbot": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "Invoice Chatbot",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "PDFco Api",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDFco Api": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Invoice Chatbot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bac5137e-daaf-4c99-b1ec-1be7ec7b72d1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}

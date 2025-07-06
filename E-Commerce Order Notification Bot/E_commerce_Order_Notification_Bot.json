@@ -1,0 +1,178 @@
+{
+  "name": "E_commerce_Order_Notification_Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/ecommerce-order",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        180,
+        -100
+      ],
+      "id": "4d2e935b-94e5-4aba-a831-efcad3e61dcf",
+      "name": "Webhook",
+      "webhookId": "e5e99fe1-8498-42a3-97f3-bb66648fef6a"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "154d778e-0454-4c5c-800d-6fd5fff88b50",
+              "name": "Customer Name",
+              "value": "={{ $json.body.customer_name }}",
+              "type": "string"
+            },
+            {
+              "id": "7ed74d22-000c-4bf6-9c07-22bcc9b40374",
+              "name": "Order Total",
+              "value": "={{ $json.body.order_total }}",
+              "type": "number"
+            },
+            {
+              "id": "0a2d15a3-ae78-4f37-8b59-74b1f5c82c97",
+              "name": "VIP",
+              "value": "={{ $json.body.vip }}",
+              "type": "boolean"
+            },
+            {
+              "id": "24b640d5-d6a4-4c4a-8290-331090542a92",
+              "name": "Items_Formatted",
+              "value": "={{ $json.body.items.map(i => `${i.name} (x${i.qty})`).join(\", \") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "ignoreConversionErrors": true
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        -100
+      ],
+      "id": "7096c7f1-4b93-4378-98d0-54dca92eb7b9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C093CPLRJ03",
+          "mode": "list",
+          "cachedResultName": "order"
+        },
+        "text": "=New Order: {{ $('Notion').item.json.name }} - {{ $('Notion').item.json.property_order_total }} \nVIP: {{ $('Notion').item.json.property_vip }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1060,
+        -100
+      ],
+      "id": "d6730b05-801b-4ff9-a5ca-faef5f1312e6",
+      "name": "Slack",
+      "webhookId": "aff645d9-6cdb-4a90-b6da-2f67ae5fdd3c"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        620,
+        -100
+      ],
+      "id": "766abe83-6221-46d6-ac26-942cfa2f9d9a",
+      "name": "Create a database page"
+    },
+    {
+      "parameters": {
+        "fromEmail": "Enter Your Email",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        840,
+        -100
+      ],
+      "id": "4ba07513-0713-46fd-ab34-492ecf10a032",
+      "name": "Send email",
+      "webhookId": "ecfddfc7-c85a-4d94-8297-c2e3cdeb26b4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Create a database page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a database page": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ec6c2da7-c887-4f00-bbd9-a91291f1bef7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "yeHnJWjma96ZnKS2",
+  "tags": []
+}
