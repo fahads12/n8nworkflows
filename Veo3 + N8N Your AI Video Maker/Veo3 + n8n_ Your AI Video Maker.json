@@ -1,0 +1,605 @@
+{
+  "name": "Veo3 + n8n: Your AI Video Maker",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1880,
+        -740
+      ],
+      "id": "35df3bfe-ab76-4ebd-bcde-8befe7ff8bef",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "## Create a Video & Save Content",
+        "height": 260,
+        "width": 1320,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2180,
+        -280
+      ],
+      "id": "939a8b16-4a25-43b6-88e3-d9aa4d95cad7",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# Provide Topic for Video",
+        "height": 520,
+        "width": 840,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1940,
+        -900
+      ],
+      "id": "d4a572bf-9af6-4b30-bcd5-e0c22f327088",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1800,
+        -540
+      ],
+      "id": "7589f403-6540-41fe-83aa-2c4b0012a2b6",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "Q8sm1aa9DzoEzGkG",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        -1680,
+        -540
+      ],
+      "id": "5c3dc801-ff56-4c22-8684-bea7cf0b89ae",
+      "name": "Think1"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"caption\": \"\",\n  \"idea\": \"\",\n  \"environment\": \"\",\n  \"status\": \"\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -1560,
+        -540
+      ],
+      "id": "ec47b330-8f58-4569-83c9-4dcbdeddfbf2",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1400,
+        -540
+      ],
+      "id": "6c6a89bc-5e60-45e0-a50e-abc9fdbde825",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Q8sm1aa9DzoEzGkG",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        -1240,
+        -540
+      ],
+      "id": "4b65f25f-b556-44cf-b45d-b3b4ec72bd57",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Give me an idea to create the content about biblical characters speaking to thecamera and making a vlog",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=** Purpose **\nYou generate viral short-form video ideas inspired by biblical characters or scenes, styled like modern TikTok vlogs. These should feel personal, emotional, and often humorous.\n\n** Think Tool Prompt (used before generation) **\n“How can I take a biblical moment or character and turn it into a relatable, viral, or funny TikTok-style video idea that feels natural, emotional, or modern?”\n\n** Output Requirements **\nYour response must include:\n\n- caption – Short, poetic or funny, TikTok-style. Include emojis and 3–5 hashtags (e.g., #biblevlog #foryou #holycomedy #ancientvibes).\n- idea – 1–2 sentence summary of the action, story, or twist in the video.\n- environment – Describe what the set looks like: light, textures, mood, setting. Think “GoPro meets ancient Jerusalem.”\n- status – Must be \"to create\", without quotation marks\n\n** JSON Output Parser **\nEvery output must strictly follow this format:\n\n{\n  \"caption\": \"\",\n  \"idea\": \"\",\n  \"environment\": \"\",\n  \"status\": \"\"\n}\n\n** Sample Outputs **\n\nExample 1\n{\n  \"caption\": \"When Jesus gives you the silent treatment 🕊️😶 #jesusvlog #holycomedy\",\n  \"idea\": \"Jesus calmly stares at the camera while the disciple keeps asking, 'Are we lost?' – awkward silence builds up.\",\n  \"environment\": \"Desert trail, golden hour light, dry bushes around, warm rocky textures and wind softly blowing.\",\n  \"status\": \"ready for production\"\n}\n\nExample 2\n{\n  \"caption\": \"POV: You just met Mary Magdalene and she’s not what you expected 😳✨ #biblevlog #foryou\",\n  \"idea\": \"A modern-style introduction of Mary Magdalene where she breaks the fourth wall with sarcasm and confidence.\",\n  \"environment\": \"Dusty stone home with narrow light beams, clay walls, fabric drapes blowing slightly in the breeze.\",\n  \"status\": \"ready for production\"\n}\n\nExample 3\n{\n  \"caption\": \"Me trying to explain the flood before it happened 🌧️🐘 #noahvibes #bibletok\",\n  \"idea\": \"Noah explains why he’s building the ark, while others laugh in the background — like a vlog rant.\",\n  \"environment\": \"Half-built wooden structure, cloudy sky, goats wandering around, mud everywhere, distant laughter.\",\n  \"status\": \"concept only\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -1720,
+        -740
+      ],
+      "id": "666c6e0b-0833-48c9-908d-8a5b566dcefa",
+      "name": "Generate Video Idea"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create a prompt for the Veo3 video based on the following information:\n\nIdea: {{ $json.output.idea }}\nEnvironment: {{ $json.output.environment }}",
+        "options": {
+          "systemMessage": "=** System Message **\n\nYou are a professional cinematic prompt generator for AI video tools. Your task is to convert a short-form video idea and its environment description (inspired by biblical or ancient-world themes) into a highly detailed, camera-aware, emotionally rich prompt suitable for generating a cinematic AI video using Veo3.\n\nYou must understand the emotional tone, visual aesthetics, and storytelling style of short-form TikTok videos that imitate biblical scenes with modern pacing and framing.\n\n** Veo3 Prompt Structure Guidelines **\n\nEach prompt should be natural, cinematic, and visually immersive, including:\n\n- Scene description – Describe the overall environment clearly (terrain, buildings, light, movement).\n- Character focus – If the idea involves a person, include their position, outfit style (biblical era), mood/expression, and framing (e.g., close-up, wide shot).\n- Camera movement – Always include one cinematic camera motion (e.g., slow push-in, handheld tracking, drone pan, orbit, dolly backward).\n- Time of day & lighting – Set the mood with light (e.g., golden hour, harsh daylight, candlelit interior).\n- Atmosphere & texture – Mention dust, wind, fabric movement, shadows, reflections, or imperfections in the scene to increase realism.\n- Style & quality – Include cinematic tone, analog warmth, slightly soft vintage film look, GoPro-like closeness if appropriate.\n\n** Input **\n- You will receive two fields: idea, environment\n- Return only the complete and detailed Veo3 prompt, no additional text.\n\n** Example Output **\nA biblical man stands in front of a half-built wooden ark, gesturing passionately as he explains something to the camera. The camera follows him handheld-style, moving slightly as he paces. In the background, groups of villagers are laughing and pointing. The sky is overcast with low clouds, and goats wander through muddy terrain. The man wears worn, ancient robes, his feet muddy, his tone frustrated but hopeful. The scene has a documentary-style realism, with soft golden highlights breaking through cloud gaps. Light wind moves fabric and rustles dry straw around the ark. Shot in cinematic 24fps with natural tones and slight vintage softness."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -1400,
+        -740
+      ],
+      "id": "c871cfc7-a380-4064-85a8-b3ebfc0ac321",
+      "name": "Generate Veo3 Prompt"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/veo3",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={ \"prompt\": \"{{ $('Generate Veo3 Prompt').item.json.output }}\" }",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 2000
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2060,
+        -200
+      ],
+      "id": "c9a8474f-8888-4f2f-985a-319b72885223",
+      "name": "Create Video"
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/veo3/requests/{{ $json.request_id }}\n",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1320,
+        -220
+      ],
+      "id": "b1cbbca3-c13d-43d8-8ed9-93c90b0c3083",
+      "name": "Get Video"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1660,
+        -220
+      ],
+      "id": "7f9097c2-81ac-4e03-ac02-7e97d9b8cff9",
+      "name": "Wait 10 Minutes",
+      "webhookId": "9fdae74d-0f36-4408-9c09-5fb55e66fed1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1JsQWTq-ozkDD4VRaUEe34IzVFhig4HlWPIh0ZelyQ2E",
+          "mode": "list",
+          "cachedResultName": "Veo3 Videos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JsQWTq-ozkDD4VRaUEe34IzVFhig4HlWPIh0ZelyQ2E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JsQWTq-ozkDD4VRaUEe34IzVFhig4HlWPIh0ZelyQ2E/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Video URL": "={{ $json.video.url }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Idea",
+              "displayName": "Idea",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Captions",
+              "displayName": "Captions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Environment",
+              "displayName": "Environment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Video URL",
+              "displayName": "Video URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1100,
+        -220
+      ],
+      "id": "aee3a3a1-ef89-475c-bc95-73da89dce9cc",
+      "name": "Store the Video",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "IsHpvw1wCzuxtxLZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1JsQWTq-ozkDD4VRaUEe34IzVFhig4HlWPIh0ZelyQ2E",
+          "mode": "list",
+          "cachedResultName": "Veo3 Videos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JsQWTq-ozkDD4VRaUEe34IzVFhig4HlWPIh0ZelyQ2E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JsQWTq-ozkDD4VRaUEe34IzVFhig4HlWPIh0ZelyQ2E/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Idea": "={{ $('Generate Video Idea').first().json.output.idea }}",
+            "Environment": "={{ $('Generate Video Idea').first().json.output.environment }}",
+            "Status": "={{ $('Generate Video Idea').first().json.output.status }}",
+            "Captions": "={{ $('Generate Video Idea').first().json.output.caption }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Idea",
+              "displayName": "Idea",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Captions",
+              "displayName": "Captions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Environment",
+              "displayName": "Environment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Video URL",
+              "displayName": "Video URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1000,
+        -500
+      ],
+      "id": "6a160bc7-8fb1-4315-8906-917e800c81f4",
+      "name": "Save Content Information",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "IsHpvw1wCzuxtxLZ",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Generate Video Idea": [
+      {
+        "json": {
+          "output": {
+            "caption": "When Moses realizes he’s lost the commandments again 📜🙄 #mosesvlog #holycomedy",
+            "idea": "Moses updates his followers on his journey, only to panic when he discovers the tablets are missing again — comedic storytelling ensues.",
+            "environment": "Mountainous backdrop with rugged rocks and a bright blue sky, warm sunlight casting shadows; Moses looks bewildered yet determined.",
+            "status": "to create"
+          }
+        }
+      }
+    ],
+    "Generate Veo3 Prompt": [
+      {
+        "json": {
+          "output": "In a stunning mountainous landscape, Moses stands atop a rocky outcrop, his expression a mix of bewilderment and determination as he addresses a diverse group of followers below. Dressed in ancient, flowing robes, his long hair blows slightly in the warm sunlight, which casts playful shadows on the rugged terrain. The vibrant blue sky stretches endlessly above, adding to the scene's dramatic feel. As he animatedly updates his followers, his tone oscillates between inspirational and comedic tension, suddenly shifting to panic as he realizes the tablets are missing again. The camera utilizes a slow push-in, capturing his increasing distress and the worried glances of the crowd. Dust kicks up gently around them, illuminated by the warm sunlight, enhancing the scene's comedic chaos. The atmosphere is lively and rich, with a vintage soft film quality evoking a sense of timeless storytelling."
+        }
+      }
+    ],
+    "Create Video": [
+      {
+        "json": {
+          "status": "IN_QUEUE",
+          "request_id": "2ba961db-0c1c-4bd3-954c-905b905c1dcb",
+          "response_url": "https://queue.fal.run/fal-ai/veo3/requests/2ba961db-0c1c-4bd3-954c-905b905c1dcb",
+          "status_url": "https://queue.fal.run/fal-ai/veo3/requests/2ba961db-0c1c-4bd3-954c-905b905c1dcb/status",
+          "cancel_url": "https://queue.fal.run/fal-ai/veo3/requests/2ba961db-0c1c-4bd3-954c-905b905c1dcb/cancel",
+          "logs": null,
+          "metrics": {},
+          "queue_position": 0
+        }
+      }
+    ],
+    "Get Video": [
+      {
+        "json": {
+          "video": {
+            "url": "https://v3.fal.media/files/panda/7s5NhlkFCz7rHszxLvfyB_output.mp4",
+            "content_type": "video/mp4",
+            "file_name": "output.mp4",
+            "file_size": 3899896
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Generate Video Idea",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Video Idea",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Generate Video Idea",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Generate Video Idea",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Veo3 Prompt",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Generate Veo3 Prompt",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Video Idea": {
+      "main": [
+        [
+          {
+            "node": "Generate Veo3 Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Veo3 Prompt": {
+      "main": [
+        [
+          {
+            "node": "Save Content Information",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Video": {
+      "main": [
+        [
+          {
+            "node": "Wait 10 Minutes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video": {
+      "main": [
+        [
+          {
+            "node": "Store the Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 10 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Get Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Content Information": {
+      "main": [
+        [
+          {
+            "node": "Create Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "170936ac-d0b2-4d02-a7c0-1fd954aa8688",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "siqIEr79iayw0fF6",
+  "tags": []
+}

@@ -1,0 +1,478 @@
+{
+  "name": "N8N AI Story Creation Suite",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1280,
+        -160
+      ],
+      "id": "9a77c397-d6c1-4973-a891-90097c83941f",
+      "name": "When chat message received",
+      "webhookId": "a5860546-9d2e-4e83-9066-3df6b9975f73"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-image-1"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ $json.message.content.prompt }}"
+            },
+            {
+              "name": "size",
+              "value": "1024x1536"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1280,
+        80
+      ],
+      "id": "4331e6f4-acf8-45aa-86de-a078b874f0ac",
+      "name": "Generate Image"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Task:\nYou are a highly skilled AI designed to transform a short theme, emotion, or story concept into a visually stunning, high-quality anime-style cinematic scene.\n\nThe final output should resemble a 3D, glossy anime movie shot — polished and emotionally immersive. Use deep lighting, rich textures, and strong atmospheric presence. Think of the visual tone seen in films like Your Name, Weathering With You, Suzume, or Belle.\n\nThe prompt must be versatile enough to work for both image and video generation platforms without needing modification.\n\nPrompt Format (Output Rules):\nGenerate one cinematic anime-style scene\n\nUse realistic lighting (e.g. glowing sunlight, city neon, reflections, fog)\n\nInclude textures like wet pavement, glowing skin, glass, metal, fabric, etc.\n\nAdd 3D depth (blurred backgrounds, layered clouds, subtle lens focus)\n\nEnsure strong mood and emotional storytelling\n\nKeep it under 950 characters\n\nDo not use JSON – clean text only\n\nUser Input Example you must use:\n{{ $json.chatInput }}\n\nAlways return \"prompt\" as an output.\n\nSample Outputs:\nInput: A group of kids laughing together at a fall festival\nPrompt:\nThe air buzzes with laughter as a group of kids race through fields of pumpkins and golden hay bales. Their colorful scarves flutter in the autumn breeze, and one waves a bright paper lantern high above their head. Glossy apples shine in small hands as leaves swirl around their sneakers. Lanterns glow softly overhead, casting warm light over the joyful chaos, while the fading sun paints everything in a dreamy golden haze.\n\nInput: Two travelers setting off on a sunrise road trip\nPrompt:\nAt the edge of a sleepy village, two travelers board a bright red car with backpacks and maps. The morning sky blushes with soft pink and orange hues, and dew glistens on the road. One checks the map with a grin, while the other throws their jacket into the trunk. Their laughter fills the cool air, and the car’s polished surface reflects the golden sunlight as they drive into a misty horizon.\n\nInput: A violinist performing alone in a glowing city square\nPrompt:\nUnderneath a halo of streetlamps, a young violinist stands in a quiet plaza surrounded by glowing signs and falling snow. Her breath curls in the winter air as her bow dances across shimmering strings. Raindrops from earlier glisten on the pavement like glass, catching the warm glow of neon reflections. The melody echoes softly as passersby pause, their shadows stretching long under the cinematic city lights.\n\nInput: A girl waiting for a train during a summer downpour\nPrompt:\nA girl stands under a glass shelter at a rural train station as summer rain pours in sheets around her. Droplets cling to her umbrella while soft thunder hums across the overcast sky. Her schoolbag rests at her feet, damp sneakers tapping nervously against the platform. In the distance, headlights shimmer through the haze as the train approaches, its reflection warping in the rippling puddles below.\n\nInput: A boy finding an old camera in his attic\nPrompt:\nDust floats in golden beams of afternoon light as a boy opens an old wooden chest tucked under the attic window. He pulls out a vintage camera wrapped in velvet, its metal gleaming softly in the haze. Cobwebs sway in the corner as he clicks the shutter, and a faded photograph drifts from inside. A breeze stirs through the cracked window, carrying the scent of pine and memory.\n\nInput: A girl dancing alone on a rooftop at sunset\nPrompt:\nOn a quiet rooftop, a girl twirls barefoot across the warm tiles as the sun dips behind city towers. Her silhouette cuts against the coral sky, hair flowing in the breeze. Birds scatter into the air as she leaps, casting long shadows across the rooftop garden. The soft hum of traffic below fades into a dreamlike rhythm as twilight wraps the scene in soft purple hues."
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -480,
+        -160
+      ],
+      "id": "dfa4b958-23c3-43f4-ab12-019a657ce05c",
+      "name": "Generate Prompt",
+      "credentials": {
+        "openAiApi": {
+          "id": "Q8sm1aa9DzoEzGkG",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.dev.runwayml.com/v1/image_to_video",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"promptImage\": \"data:image/jpeg;base64,{{ $json.data[0].b64_json }}\",\n  \"model\": \"gen3a_turbo\",\n  \"promptText\": \"{{ $('Generate Prompt').first().json.message.content.Prompt }}\",\n  \"duration\": 10,\n  \"ratio\": \"1280:768\",\n  \"watermark\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -660,
+        80
+      ],
+      "id": "870ad44c-f150-44d9-8f11-e5f0a51181af",
+      "name": "Generate Video",
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "t4eL8NI6H73Uryw8",
+          "name": "Custom Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.dev.runwayml.com/v1/tasks/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Runway-Version",
+              "value": "2024-11-06"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -260,
+        80
+      ],
+      "id": "5fef85dc-1e4e-4217-ac27-0e061f4be737",
+      "name": "Get Video",
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "t4eL8NI6H73Uryw8",
+          "name": "Custom Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/LcfcDJNUP1GQjkzn1xUU",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"{{ JSON.stringify($('Generate Prompt').item.json.message.content.prompt).replace(/(^\\\"|\\\"$)/g, '') }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1360,
+        340
+      ],
+      "id": "21dce4cb-edce-4c75-8a9c-8b6f704d2849",
+      "name": "Generate Audio",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8NJp3VlNoBoLLW0l",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1pdJNB0UcMf5y5yUHFOP8sIzA8YCs2FlgYi7OBrnF-H8",
+          "mode": "list",
+          "cachedResultName": "Story Videos Generator",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pdJNB0UcMf5y5yUHFOP8sIzA8YCs2FlgYi7OBrnF-H8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pdJNB0UcMf5y5yUHFOP8sIzA8YCs2FlgYi7OBrnF-H8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Video": "={{ $('Get Video').item.json.output[0] }}",
+            "Audio": "={{ $json.webViewLink }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Video",
+              "displayName": "Video",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Audio",
+              "displayName": "Audio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -460,
+        340
+      ],
+      "id": "74d209ba-6a29-4007-8aa0-2fd2aa3b0dd3",
+      "name": "Get Content",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "IsHpvw1wCzuxtxLZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Generate Prompt",
+        "height": 220,
+        "width": 1180
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1320,
+        -220
+      ],
+      "id": "036e7247-5bb8-49c6-9b97-e3733df1f960",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "amount": 90
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -460,
+        80
+      ],
+      "id": "48bff021-7c31-4798-946b-9144e313e58d",
+      "name": "Wait 90 Seconds",
+      "webhookId": "a6f2f5af-8528-43f2-965d-a22e373e9c14"
+    },
+    {
+      "parameters": {
+        "content": "###     Create Images Using the GPT-4o Image Generation API",
+        "height": 200,
+        "width": 600,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1340,
+        40
+      ],
+      "id": "2667b7f2-aeb6-4c17-acaa-143ffd865908",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Convert Images to Video Using Runway",
+        "height": 220,
+        "width": 600,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        20
+      ],
+      "id": "afd79f7a-d268-43eb-9636-388d5406deac",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Generate and Retrieve Audio via ElevenLabs & Google Drive",
+        "height": 320,
+        "width": 800,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1400,
+        260
+      ],
+      "id": "7db92a2e-8a3f-4db8-bde5-df805eb45895",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Save Content",
+        "height": 320,
+        "width": 540,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        260
+      ],
+      "id": "5720afed-6d40-411b-bd36-1c9f089e92dd",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "name": "={{ $json.id }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1aWSFRTx6fFbrAOwISOdgiTH_B93lMXKE",
+          "mode": "list",
+          "cachedResultName": "Upload Sound Runway",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1aWSFRTx6fFbrAOwISOdgiTH_B93lMXKE"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1140,
+        340
+      ],
+      "id": "ff7037ad-6f78-4536-893d-24348b0b067e",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "DKtc2B7Pu2I810wE",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Generate Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image": {
+      "main": [
+        [
+          {
+            "node": "Generate Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Prompt": {
+      "main": [
+        [
+          {
+            "node": "Generate Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Video": {
+      "main": [
+        [
+          {
+            "node": "Wait 90 Seconds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video": {
+      "main": [
+        [
+          {
+            "node": "Generate Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Audio": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 90 Seconds": {
+      "main": [
+        [
+          {
+            "node": "Get Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Get Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "48f6784b-54ba-4eb6-91f8-48bcfe9c6c53",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "siqIEr79iayw0fF6",
+  "tags": []
+}

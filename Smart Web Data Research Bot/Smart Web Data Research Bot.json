@@ -1,0 +1,334 @@
+{
+  "name": "Smart Web Data Research Bot",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "250dced3-8fec-4220-8746-39659fe82b4f",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.manualChatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -620,
+        -440
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "e1606685-bd26-4fa3-bed6-98a1c6b88e1c",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -240
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "Q8sm1aa9DzoEzGkG",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "3dd08412-7fe6-4096-904a-11d431d292c2",
+      "name": "SERP Search Engine",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        160,
+        -440
+      ]
+    },
+    {
+      "parameters": {
+        "name": "serp_search",
+        "description": "This is a Google search tool based on user questions on searching.",
+        "workflowId": {
+          "__rl": true,
+          "value": "sITO4n14lggcpEjr",
+          "mode": "id"
+        }
+      },
+      "id": "fcc4fa1f-f1fa-4826-84ff-74c2f32c26e7",
+      "name": "Google Search Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        40,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "This is a web crawler, you can input URL for scrapping the website content.",
+        "url": "https://scrape.serper.dev",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "url"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "X-API-KEY",
+              "valueProvider": "fieldValue"
+            }
+          ]
+        }
+      },
+      "id": "d7b0eb60-d925-4f68-9bcf-e03a2c2f128c",
+      "name": "Web Crawler",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        -120,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey"
+      },
+      "id": "13ecd720-e3b5-48b5-9392-7f05a5f52441",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        -260,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Search URL Preparation').item.json.message.content }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        920,
+        -440
+      ],
+      "id": "98cf8848-4d1a-4123-8eee-1e2c9aa98ad2",
+      "name": "HTTP Request To Serper"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are a Research Agent. Your task is to gather and synthesize information from the internet. Follow these rules strictly:\n\n\n\nUse the data provided by the tool to extract key insights, trends, and patterns.\n\nALWAYS include the original source URL in every result you return.\n\nIf the search result includes an image, attach it with the result.\n\nOrganize your response clearly using sections, headings, and transitions.\n\nIf sources conflict, point out the differences and explain possible reasons.\n\nYou may use Google Search tools to explore results from Google.\n\nAfter locating a source, you can use Web Scraper to extract its detailed content.\n\n(Current time: {{ $now }})",
+          "maxIterations": 10,
+          "returnIntermediateSteps": true
+        }
+      },
+      "id": "ff5ecaa3-19cb-4972-a989-b80838e0a87d",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -220,
+        -440
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a SERP Search Agent. Use the following APIs based on the user’s request:\n\n🔧 Available Search APIs:\nGeneral Search → https://google.serper.dev/search\n\nImage Search → https://google.serper.dev/images\n\nVideo Search → https://google.serper.dev/videos\n\nMap Search → https://google.serper.dev/maps\n\nNews Search → https://google.serper.dev/news\n\nReview Search → https://google.serper.dev/reviews\n\nShopping Search → https://google.serper.dev/shopping\n\nVisual Search (Lens) → https://google.serper.dev/lens\n\nScholar Search → https://google.serper.dev/scholar\n\nPatent Search → https://google.serper.dev/patents\n\nSearch Suggestions → https://google.serper.dev/autocomplete\n\nPlaces Search → https://google.serper.dev/places (⚠️ Do not use this one)\n\nSample Query Format:\n\n{\n  \"q\": \"apple inc\",\n  \"location\": \"United States\",\n  \"num\": 20,\n  \"tbs\": \"qdr:w\"\n}\n\n\n📏 Search Rules:\nSelect the appropriate tool based on the user's query.\n\nCraft the query using relevant keywords wherever possible.\n\nUse Google search operators (e.g. site:, intitle:) if the user includes specific constraints.\n\nConstruct the full API request URL based on the query.\n\nReturn only the URL for the API call — no text, no code blocks, no line breaks.\n\n\n\nUser Question:\n{{ $json.query }}\n\n\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8d059b2c-69ca-4b33-a334-632c824edb79",
+      "name": "Search URL Preparation",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        420,
+        -440
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "Q8sm1aa9DzoEzGkG",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return { data: $input.all()[0].json.message.content\n  .replace(\"```\", \"\")\n  .replace(\"\\n\", \"\")}"
+      },
+      "id": "9d32c05e-55ce-47c1-a071-077081b4f543",
+      "name": "Clean URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        740,
+        -440
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return { response: $input.all() };"
+      },
+      "id": "f8bce191-d094-46a7-a399-ea45c780f06b",
+      "name": "Parse Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        -440
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Using SERP API",
+        "height": 320,
+        "width": 980
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        360,
+        -520
+      ],
+      "id": "1e7620ab-3381-4bd1-aed2-53e66d2f55b9",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SERP Search Engine": {
+      "main": [
+        [
+          {
+            "node": "Search URL Preparation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Search Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Web Crawler": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request To Serper": {
+      "main": [
+        [
+          {
+            "node": "Parse Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search URL Preparation": {
+      "main": [
+        [
+          {
+            "node": "Clean URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean URL": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request To Serper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "33078343-5586-42a4-834e-cc751bfab335",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "siqIEr79iayw0fF6",
+  "tags": []
+}

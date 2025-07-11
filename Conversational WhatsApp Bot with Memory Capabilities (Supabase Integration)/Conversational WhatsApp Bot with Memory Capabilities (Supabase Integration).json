@@ -1,0 +1,271 @@
+{
+  "name": "Conversational WhatsApp Bot with Memory Capabilities (Supabase Integration)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -20
+      ],
+      "id": "052cc256-508c-4475-96e3-0c22c27c8b01",
+      "name": "WhatsApp Trigger",
+      "webhookId": "e31b1b88-9b4b-4c52-9a1b-490d7563b76b",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "j4vCNswHIuOfT91C",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        200
+      ],
+      "id": "83531c9a-ccfa-4e06-8ad7-013112a4b0c8",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Q8sm1aa9DzoEzGkG",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "ChatMemory",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "message",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "sender",
+              "fieldValue": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}"
+            },
+            {
+              "fieldId": "recipient",
+              "fieldValue": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        460,
+        200
+      ],
+      "id": "1af23ed4-79dd-47d2-b341-ecb68cba937c",
+      "name": "Save Message",
+      "credentials": {
+        "supabaseApi": {
+          "id": "oHkM8QgvuuTQBCo0",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "ChatMemory",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "sender",
+              "condition": "eq",
+              "keyValue": "={{ $json.contacts[0].wa_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        -20
+      ],
+      "id": "1e07d93d-e040-49f7-a1e2-83c021f6e81a",
+      "name": "Get Memory",
+      "credentials": {
+        "supabaseApi": {
+          "id": "oHkM8QgvuuTQBCo0",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "ChatMemory",
+        "include": "specifiedFields",
+        "fieldsToInclude": "message, created_at",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -20
+      ],
+      "id": "be62b51b-9311-4ffe-bdb5-7960a3f5996d",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "466179296585433",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        660,
+        -20
+      ],
+      "id": "a5e76ec7-2707-4618-9abe-8aebd41a5c5f",
+      "name": "WhatsApp Reply",
+      "webhookId": "121dbaa0-8c97-43c5-bb33-768685021aee",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "18Zo6KKBTzfp4xYS",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Conversational WhatsApp Bot with Memory Capabilities (Supabase Integration)",
+        "height": 500,
+        "width": 1420
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        -120
+      ],
+      "id": "f82d9ec2-351f-40e7-90e2-5a65d196150b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('WhatsApp Trigger').item.json.messages[0].text.body }}",
+        "options": {
+          "systemMessage": "=# ROLE\nYou are a friendly AI assistant.\nYou are currently chatting with a user on WhatsApp.\n\n# RULES\n\n\nWhen the user sends a new message, check if they shared any **important information** that should be **saved in memory** for later.\n\nIf yes, use the Save Memory tool to save it.\nDo NOT tell the user that you are saving anything.\n\nJust keep the conversation going as usual.\n\n\n\n# Tools\n\nUse this tool to **store any important facts** shared by the user.\nSummarize the information clearly and pass it to this tool. \n\n# Memories\n\nThese are the **last saved facts** from the user (with date and time):\n{{ $json.ChatMemory.toJsonString() }}\n\n\n!! IMPORTANT !!\nUse this stored info when replying.\nIf something is already saved, don’t ask for it again.\n\nKeep your responses natural and friendly."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        300,
+        -20
+      ],
+      "id": "68f37571-bec5-4762-8442-92dccb5fa0c3",
+      "name": "Conversational WhatsApp Bot"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Memory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Conversational WhatsApp Bot",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Message": {
+      "ai_tool": [
+        [
+          {
+            "node": "Conversational WhatsApp Bot",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Memory": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Conversational WhatsApp Bot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversational WhatsApp Bot": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9b85156d-3538-4016-8c89-fd3574d0ee12",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "siqIEr79iayw0fF6",
+  "tags": []
+}

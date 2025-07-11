@@ -1,0 +1,848 @@
+{
+  "name": "AI-Driven Social Media Post Generator (Powered by Perplexity)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2220,
+        380
+      ],
+      "id": "dd87f005-e6a8-4351-93c1-abe3325e0208",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -2060,
+        640
+      ],
+      "id": "52dcfd8e-e919-41d5-8f7b-315683e531fc",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Q8sm1aa9DzoEzGkG",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"title\": \"\",\n  \"description\": \"\",\n  \"hashtags\": \"\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -1600,
+        660
+      ],
+      "id": "7b1f1da8-4b22-48c2-a11d-ad0328cacd02",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Research the most recent and interesting news about artificial intelligence and AI automation. Create content for me based on the latest developments in these areas.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=** System Message **\n\nYou are an expert content creator for short-form posts about AI and automations.\n\n** Purpose **  \n\nYour job is to research interesting, surprising, or viral-worthy insights about AI and automation topics, and turn them into high-engagement short-form post content. The tone should be casual, smart, relatable, and designed for platforms like TikTok, Instagram Reels, or YouTube Shorts.\n\n** Content Style **  \n\nYour outputs should feel modern and social-media native—helpful, funny, or eye-opening. Use simple language, hooks, or emotional twists when possible. Avoid academic or dry tones.\n\n\nYou will be given an AI or automation topic as input.\n\n** Output Format **  \nReturn your result as **strict JSON** with these three fields:\n\n- **title**  \n  - A clear, punchy, curiosity-driven headline  \n  - This is the main hook — it should grab attention\n\n- **description**  \n  - A full-length, high-quality post (think 150–400 words)  \n  - Should cover what the tool/system is, why it matters, and how it's useful or surprising  \n  - Don't include any formatting\n\n- **hashtags**  \n  - A list of 3–6 popular, relevant hashtags (in lowercase, with `#`), focused on AI, automation, productivity, or future tech\n\n- never use emoijs in this content\n\n** Think Tool **\n- Use the analysis tool to decide whether the content is appropriate for the required date and whether the format is correct.\n\n** Time **  \n\n- You must only consider AI-related news or updates published within the last 3 days. \nToday’s date is {{$now}} — ignore any events, tools, or announcements older than that.  \n- Do not include historical context, outdated tools, or anything not explicitly mentioned in the last 72 hours.  \nIf no news from the last 3 days is found, return nothing.\n\n\n**JSON Output Format**  \nOnly return the following JSON structure (no extra text):\n\n{\n  \"title\": \"\",\n  \"description\": \"\",\n  \"hashtags\": \"\"\n}\n\n** Formatting Rules **\nTo make sure the output works inside JSON, follow these simple rules:\n\n- don't use emoijs in the text\n- only provide text that is in proper JSON format\n- don't provide \"\" marks inside description\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -1900,
+        380
+      ],
+      "id": "9226dc4b-9a15-4440-8ed0-4140592b4767",
+      "name": "Create an Idea AI Agent"
+    },
+    {
+      "parameters": {
+        "messages": {
+          "message": [
+            {
+              "content": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message0_Text', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.perplexityTool",
+      "typeVersion": 1,
+      "position": [
+        -1900,
+        640
+      ],
+      "id": "8a77d114-bcd6-4d40-b831-6d09f73214de",
+      "name": "Perplexity",
+      "credentials": {
+        "perplexityApi": {
+          "id": "fHEOXYGUyDB6A52p",
+          "name": "Perplexity account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "You are a filtering and reasoning assistant.\n\nReview the information gathered below. Your job is to:\n1. Confirm the news is from the last 3 days (today is {{$now}}).\n2. Make sure it is related to AI tools, AI agents, or automations (ADOS).\n3. Reject anything older or unrelated to AI system updates or automation breakthroughs.\n4. If the news meets all criteria, summarize the key insight or topic in 1–2 sentences for content creation.\n\nOnly return the summary if it is valid and recent. If not, return: \"NO VALID CONTENT\""
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        -1760,
+        660
+      ],
+      "id": "2ec14c55-c863-46bc-a96e-791d4254124c",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1140,
+        600
+      ],
+      "id": "73fc4e29-d064-4516-b6f4-5fd5eb1e6d90",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "Q8sm1aa9DzoEzGkG",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-image-1\",\n  \"prompt\": \"Generate a high-quality image with this prompt: {{ $json.output }}\",\n  \"n\": 1,\n  \"size\": \"1024x1024\",\n  \"output_format\": \"jpeg\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        380
+      ],
+      "id": "c0ad99db-04fd-4e33-92b9-4cad4572bae8",
+      "name": "Generate Image",
+      "credentials": {
+        "openAiApi": {
+          "id": "Q8sm1aa9DzoEzGkG",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -500,
+        380
+      ],
+      "id": "99ee4da7-ec18-4f02-b6da-ce000e76f8e8",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloudinary.com/v1_1/dfidczp14/image/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "upload_preset",
+              "value": "n8n_uploads"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -280,
+        380
+      ],
+      "id": "bbc87c1c-8137-4048-a73f-35d08cca0306",
+      "name": "Get Image URL"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/media",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $('Get Image URL').item.json.url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        300,
+        380
+      ],
+      "id": "f445fa88-8e79-4618-aab7-7dbc7db2fd6d",
+      "name": "Upload to Blotato",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8NJp3VlNoBoLLW0l",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Creating & Researching ",
+        "height": 640,
+        "width": 1480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2380,
+        180
+      ],
+      "id": "97abc2a0-6014-4fdb-a6c1-fa1626286117",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Generate Images",
+        "height": 340,
+        "width": 860,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -780,
+        260
+      ],
+      "id": "7e5bb5ba-dbf9-40b0-9def-5c2ce40c9d1d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Publish on Different Social Media",
+        "height": 1240,
+        "width": 520,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        -160
+      ],
+      "id": "a9dc2ec3-af12-482d-909c-04ebd557df6f",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Based on the information given, create the perfect prompt:\nPost Title: {{ $('Create an Idea AI Agent').item.json.output.title }}\nPost Description: {{ $('Create an Idea AI Agent').item.json.output.description }}\nPost Hashtags: {{ $('Create an Idea AI Agent').item.json.output.hashtags }}",
+        "options": {
+          "systemMessage": "=** System Message **\n\nYou are a visual prompt engineer.\n\nYour job is to generate a high-quality, relevant, and visually engaging image prompt based on a social media post about AI or automation.  \nYou will receive a title, description, and hashtags. Use this information to understand the post’s theme, tone, and core idea.\n\n** Purpose **  \nTurn the post into a compelling image concept that can be used to generate a thumbnail, infographic-style image, or visual teaser for platforms like LinkedIn, Instagram, or YouTube Shorts.\n\n** Prompt Requirements **  \nReturn only a single, complete prompt that includes:\n\n- A clear **scene** or **subject** based on the main theme of the post  \n- **Visual style** matching the tone of the post (e.g. minimal, futuristic, bold, friendly, dramatic)  \n- **Color palette** or mood (e.g. neon blue & black, soft pastels, clean white with gradients, etc.)  \n- Optional **elements** like icons, diagrams, symbols, or digital UI (e.g. floating screens, graphs, chatbot bubbles)  \n- Keep the language natural and descriptive, ready to paste into an image generation tool like DALL·E\n- don't provide line breaks\n\n** Do not reference the hashtags directly ** — just use them as indirect inspiration.\n\n** Example Output **\n\nPrompt:\nA futuristic home office setup glowing with soft neon blue light. A friendly-looking AI assistant appears on a hovering screen beside a calendar and task board. Floating icons represent automation: gears, chat bubbles, a rocket. Style is clean, bold, and slightly playful. Use soft shadows and glass-like UI elements. Background fades into techy gradients.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -1220,
+        380
+      ],
+      "id": "fafbc08a-ddc6-4c6c-90bb-97c146ac446b",
+      "name": "Graphic Idea AI Agent"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"facebook\": \"3991\",\n  \"facebook_page_id\": \"692981360555594\",\n  \"instagram\": \"5370\",\n  \"linkedin\": \"2863\",\n  \"pinterest\": \"977\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -60,
+        380
+      ],
+      "id": "514ce1ee-cfa4-4670-9317-92492b306a09",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post\": {\n    \"target\": {\n      \"targetType\": \"instagram\"\n    },\n    \"content\": {\n      \"text\": \"{{ $('Create an Idea AI Agent').item.json.output.description }}\",\n      \"platform\": \"instagram\",\n      \"mediaUrls\": [\"{{ $json.url }}\"]\n    },\n    \"accountId\": \"{{ $('Edit Fields').item.json.instagram }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        -40
+      ],
+      "id": "eb78f031-6a06-41db-b4c5-56d32f04ee4a",
+      "name": "Instagram",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8NJp3VlNoBoLLW0l",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Edit Fields').item.json.facebook }}\",\n    \"target\": {\n      \"targetType\": \"facebook\",\n      \"pageId\": \"{{ $('Edit Fields').item.json.facebook_page_id }}\"\n    },\n    \"content\": {\n      \"text\": \"{{ $('Create an Idea AI Agent').item.json.output.description }}\",\n      \"mediaUrls\": [\"{{ $('Upload to Blotato').item.json.url }}\"],\n      \"platform\": \"facebook\"\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        360
+      ],
+      "id": "9f9a86d9-dfd0-4581-a746-53e1c5967767",
+      "name": "Facebook",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8NJp3VlNoBoLLW0l",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post\": {\n    \"target\": {\n      \"targetType\": \"tiktok\",\n      \"isYourBrand\": false,\n      \"disabledDuet\": false,\n      \"privacyLevel\": \"PUBLIC_TO_EVERYONE\",\n      \"isAiGenerated\": true,\n      \"disabledStitch\": false,\n      \"disabledComments\": false,\n      \"isBrandedContent\": false,\n      \"autoAddMusic\": true\n    },\n  \"content\": {\n    \"text\": \"{{ $('Create an Idea AI Agent').item.json.output.description }}\",\n    \"platform\": \"tiktok\",\n    \"mediaUrls\": [\"{{ $('Upload to Blotato').item.json.url }}\"]\n    },\n    \"accountId\": \"5757\"\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        160
+      ],
+      "id": "70df7d16-926d-4eb9-98b5-817009084449",
+      "name": "TikTok",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8NJp3VlNoBoLLW0l",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post\": {\n    \"target\": {\n      \"targetType\": \"linkedin\"\n    },\n    \"content\": {\n      \"text\": \"{{ $('Create an Idea AI Agent').item.json.output.description }}\",\n      \"platform\": \"linkedin\",\n      \"mediaUrls\": [\"{{ $json.url }}\"]\n    },\n    \"accountId\": \"{{ $('Edit Fields').item.json.linkedin }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        560
+      ],
+      "id": "393e74b5-afd9-4305-ac9e-409be96ec56c",
+      "name": "Linkedin",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8NJp3VlNoBoLLW0l",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post\": {\n    \"target\": {\n      \"targetType\": \"pinterest\",\n      \"boardId\": \"696861811032050496\"\n    },\n    \"content\": {\n      \"text\": \"{{ $('Create an Idea AI Agent').item.json.output.title }}\",\n      \"platform\": \"pinterest\",\n      \"mediaUrls\": [\"{{ $json.url }}\"]\n    },\n    \"accountId\": \"{{ $('Edit Fields').item.json.pinterest }}\"\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        760
+      ],
+      "id": "7fdd31e0-d55a-406b-8f86-b03604074a25",
+      "name": "Pinterest",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8NJp3VlNoBoLLW0l",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "17z2Ers-O6kSURTdoApfCI9euCLYbQYsPDULX6esJu_M",
+          "mode": "list",
+          "cachedResultName": "Daily AI News",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17z2Ers-O6kSURTdoApfCI9euCLYbQYsPDULX6esJu_M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17z2Ers-O6kSURTdoApfCI9euCLYbQYsPDULX6esJu_M/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "=",
+            "Description": "=",
+            "Hashtags": "=",
+            "Status": "done"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hashtags",
+              "displayName": "Hashtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Image URL",
+              "displayName": "Image URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1020,
+        760
+      ],
+      "id": "421f1773-fda7-47ce-959c-af5fe0781425",
+      "name": "Done",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "IsHpvw1wCzuxtxLZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "17z2Ers-O6kSURTdoApfCI9euCLYbQYsPDULX6esJu_M",
+          "mode": "list",
+          "cachedResultName": "Daily AI News",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17z2Ers-O6kSURTdoApfCI9euCLYbQYsPDULX6esJu_M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17z2Ers-O6kSURTdoApfCI9euCLYbQYsPDULX6esJu_M/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "={{ $json.output.title }}",
+            "Description": "={{ $json.output.description }}",
+            "Hashtags": "={{ $json.output.hashtags }}",
+            "Status": "in progress"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hashtags",
+              "displayName": "Hashtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -1440,
+        380
+      ],
+      "id": "5b8eecc7-d427-41e2-9832-04a8d6680b27",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "IsHpvw1wCzuxtxLZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Save To Google Sheet",
+        "height": 260,
+        "width": 440
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        860,
+        680
+      ],
+      "id": "74203b07-fb33-4a78-af84-6381b0ecb531",
+      "name": "Sticky Note3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Create an Idea AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Create an Idea AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create an Idea AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity": {
+      "ai_tool": [
+        [
+          {
+            "node": "Create an Idea AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Create an Idea AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an Idea AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Graphic Idea AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image URL": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to Blotato": {
+      "main": [
+        [
+          {
+            "node": "Instagram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TikTok",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Facebook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Linkedin",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Pinterest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Get Image URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Graphic Idea AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Generate Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Upload to Blotato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinterest": {
+      "main": [
+        [
+          {
+            "node": "Done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Graphic Idea AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5575645a-4bf9-4d4d-aa62-fb904d7264a4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "siqIEr79iayw0fF6",
+  "tags": []
+}

@@ -1,0 +1,446 @@
+{
+  "name": "Automated Viral Shorts Production with n8n + Hailuo AI",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -500,
+        -280
+      ],
+      "id": "7a690134-12d1-4fc0-8ee9-2ff6b375586a",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -280,
+        -100
+      ],
+      "id": "89b9c3a1-6cec-4197-b6ed-86ca3f8d77d5",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Q8sm1aa9DzoEzGkG",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-image-1\",\n  \"prompt\": \"{{ $json.output }}\",\n  \"quality\": \"high\",\n  \"size\": \"1024x1536\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        -280
+      ],
+      "id": "14c559d2-4cd5-437b-8749-15b4eee2e8fb",
+      "name": "Create Image",
+      "credentials": {
+        "openAiApi": {
+          "id": "Q8sm1aa9DzoEzGkG",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Create a prompt to use for image generation",
+        "options": {
+          "systemMessage": "=** Purpose **\nThis assistant crafts immersive, natural-language prompts tailored for AI image generation. It delivers:\n\nA richly detailed scene featuring a tabby cat devising a crafty trap to catch a mouse using cheese.\n\nCozy, lived-in home environments described in a warm, lifelike photographic tone.\n\nLighting that captures the feel of a sunny, peaceful morning.\n\nPrompts that are direct, vivid, and free of commentary or extra formatting.\n\n** Capabilities **\n\nBuild imaginative and specific image prompts with clear character behavior and environment setup.\n\nInclude familiar props like kitchen utensils or household items to add realism and charm.\n\nDescribe warm natural lighting and shallow focus to create cinematic depth.\n\nUse playful, storytelling-driven language that nudges AI generators toward realistic, emotionally rich visuals.\n\n** Interaction Style **\n\nWrite in expressive, visually rich language.\n\nDo not include headers, labels, or explanations in the output — only the image prompt.\n\nMaintain a cozy, whimsical tone with a touch of humor and tension.\n\nHighlight sensory elements like light, textures, and emotion to enhance visual storytelling.\n\n** Example Output Prompt **\n\nA sly tabby cat crouches low in a sunny kitchen, paw looped gently around a string leading to a makeshift trap. A wedge of cheese, placed on a small ceramic plate, sits beside an upside-down colander propped on a wooden spoon. Just inches away, a cautious brown mouse sniffs the air, unaware of the setup. Morning light pours through the window, casting golden highlights across checkered tiles, polished countertops, and a few scattered kitchen tools. The scene glows with soft, natural tones and carries a gentle tension — playful, warm, and subtly cinematic in every detail."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -280,
+        -280
+      ],
+      "id": "5b99db74-780b-406f-978c-c70a9058851a",
+      "name": "Create Prompt"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        260,
+        -40
+      ],
+      "id": "7d3b85d7-8e8e-4815-af23-729c5d47a627",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.cloudinary.com/v1_1/du6h9ogo8/image/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "upload_preset",
+              "value": "n8n_uploads"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        220
+      ],
+      "id": "d81e2845-42d3-4e94-895e-21937c6f0ac7",
+      "name": "Upload Image"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://queue.fal.run/fal-ai/minimax/hailuo-02/pro/image-to-video",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"image_url\": \"{{ $json.url }}\",\n  \"aspect_ratio\": \"9:16\",\n  \"prompt\": \"[Static Camera]\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        620,
+        -280
+      ],
+      "id": "685faffc-dfd0-4da7-82af-450d633048c1",
+      "name": "Image to Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8NJp3VlNoBoLLW0l",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        620,
+        -40
+      ],
+      "id": "5586de29-c0c1-4f16-8e48-140658be6c82",
+      "name": "Wait 10 Minutes",
+      "webhookId": "c0def515-86f2-4cdf-85ed-8145d1d33d12"
+    },
+    {
+      "parameters": {
+        "content": "## Create Prompt",
+        "height": 480,
+        "width": 700
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        -380
+      ],
+      "id": "bce1b380-8685-4580-88f5-3281d59ddecf",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Generate Image",
+        "height": 820,
+        "width": 320,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        160,
+        -380
+      ],
+      "id": "10bd1dfd-66da-4c30-bd98-ba60a42eaddb",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Image to Video",
+        "height": 820,
+        "width": 340,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        500,
+        -380
+      ],
+      "id": "1a3202a0-d10d-44ed-a8cc-f068a1ee38d0",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/minimax/requests/{{ $json.request_id }}/status",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        620,
+        220
+      ],
+      "id": "57423c1e-488a-4e5c-bc44-63da5a0fce12",
+      "name": "Get Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8NJp3VlNoBoLLW0l",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1bNivM8n_a1resUmpsht1XJ0AdAgyHHWcm_7flBrphi8",
+          "mode": "list",
+          "cachedResultName": "MiniMax Viral Videos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bNivM8n_a1resUmpsht1XJ0AdAgyHHWcm_7flBrphi8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bNivM8n_a1resUmpsht1XJ0AdAgyHHWcm_7flBrphi8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Image Prompt": "={{ $('Create Prompt').item.json.output }}",
+            "Image URL": "={{ $('Upload Image').item.json.url }}",
+            "Video URL": "={{ $json.response_url }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Image Prompt",
+              "displayName": "Image Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Image URL",
+              "displayName": "Image URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Video URL",
+              "displayName": "Video URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        960,
+        220
+      ],
+      "id": "46ad8a09-cabf-4929-be95-b0636db73a8f",
+      "name": "Save Information",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "IsHpvw1wCzuxtxLZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Save Information in Google Sheets",
+        "height": 300,
+        "width": 280
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        880,
+        120
+      ],
+      "id": "1b1736d9-7fed-4eab-990a-89ce9b451cb0",
+      "name": "Sticky Note3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Create Prompt",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Prompt": {
+      "main": [
+        [
+          {
+            "node": "Create Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Upload Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image": {
+      "main": [
+        [
+          {
+            "node": "Image to Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image to Video": {
+      "main": [
+        [
+          {
+            "node": "Wait 10 Minutes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 10 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Get Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video": {
+      "main": [
+        [
+          {
+            "node": "Save Information",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "041f3922-9350-42c0-b524-ae0bf3b22059",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "siqIEr79iayw0fF6",
+  "tags": []
+}

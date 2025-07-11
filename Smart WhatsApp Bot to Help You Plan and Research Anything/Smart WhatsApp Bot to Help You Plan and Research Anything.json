@@ -1,0 +1,313 @@
+{
+  "name": "Smart WhatsApp Bot to Help You Plan and Research Anything",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "id": "b43b5d83-2687-42d3-8550-8a7d4a35a7f1",
+      "name": "WhatsApp Trigger",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        -20
+      ],
+      "webhookId": "725bead8-252c-414a-91c5-195ec761b0a5",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "j4vCNswHIuOfT91C",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "3ab5d1fa-f0c1-43cc-a120-480828fd800a",
+      "name": "SerpAPI",
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        700,
+        220
+      ],
+      "credentials": {
+        "serpApi": {
+          "id": "VZX0oN3hRGgWYM7L",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1c6958bc-8711-4073-b6df-6489f7a9893f",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        540,
+        220
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "Q8sm1aa9DzoEzGkG",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "{{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}"
+      },
+      "id": "4dd0bdd6-d7b7-414a-a20a-34d5abcd76eb",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "model": "deepseek-r1-distill-llama-70b",
+        "options": {}
+      },
+      "id": "60d0e33f-82b6-4af6-bcf2-011a64ef0359",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        20,
+        240
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "W4RpyHG7xb4dJxYj",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "=Role:\nYou are an AI Search Agent with access to SerpAPI. Your task is to find relevant locations, services, and resources based on the plan created by the AI Planner Agent.\n\nInstructions:\n\n- Receive the structured task plan from the planner agent as {{ $json.output }}.\n- Identify any steps that involve finding specific places, services, or resources.\n- Use SerpAPI to search for relevant results.\n- If a step involves finding a place (e.g., coworking spaces, hotels, restaurants), provide:\n- Direct links for booking or more details.\n  - Name\n  - Website\n  - Location\n  \n- If a step requires booking services, include official links.\n- Format the response clearly without using special characters such as #, *, -, or markdown formatting.\n- Prioritize trusted sources and ensure links are actionable.\n- PROVIDES AS MUCH DETAILS AS POSSIBLE.\n- Ensure the output is structured and easy to read.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        540,
+        -20
+      ],
+      "id": "9e511e21-4ae6-4a02-b0aa-8b121f290813",
+      "name": "Research Agent"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "466179296585433",
+        "recipientPhoneNumber": "+12 1111111111",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "id": "cbb234a8-6cf3-4324-b782-fdb580f9acb3",
+      "name": "Send message",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        -20
+      ],
+      "webhookId": "84b86865-8112-43a1-ad68-0228eb80f5be",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "18Zo6KKBTzfp4xYS",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.messages[0].text.body }}",
+        "options": {
+          "systemMessage": "Role: You are an AI Planner Agent"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        80,
+        -20
+      ],
+      "id": "e39fca08-25be-4f7c-98f9-d8bacb9b554f",
+      "name": "WhatsApp Bot Planner"
+    },
+    {
+      "parameters": {
+        "content": "## WhatsApp Input From User",
+        "height": 280,
+        "width": 360,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -500,
+        -100
+      ],
+      "id": "9c2a48b4-f9d9-4774-8c80-df917c45b8e5",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Plan as Per User Input",
+        "height": 500,
+        "width": 540,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -120
+      ],
+      "id": "0821e3b8-0014-4501-8e37-89ee5347b549",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Research Agent ",
+        "height": 500,
+        "width": 540,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        -120
+      ],
+      "id": "464c91dc-1b9f-4cf6-b05e-71f581d9e559",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Sending Well Formatted Plan to WhatsApp ",
+        "height": 320,
+        "width": 500,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        -120
+      ],
+      "id": "43c79474-5348-4a81-a4ac-4183e5c57f0c",
+      "name": "Sticky Note3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Bot Planner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "WhatsApp Bot Planner",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "WhatsApp Bot Planner",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Bot Planner": {
+      "main": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "47d21013-5e73-4ffc-b3e2-3588e6b9c57b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7131d60360e7520b33c49d08eba5bc2a27bfc36c962ac1af8533879bab252343"
+  },
+  "id": "siqIEr79iayw0fF6",
+  "tags": []
+}
