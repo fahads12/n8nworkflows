@@ -42,5 +42,3 @@ If you find this collection helpful:
 
 ---
 
-📬 **Questions or collaborations?**  
-Feel free to connect with me on fahadwarraich900@gmail.com
